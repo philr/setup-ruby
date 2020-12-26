@@ -7,7 +7,7 @@ const common = require('./common')
 const rubyBuilderVersions = require('./ruby-builder-versions')
 
 const builderReleaseTag = 'toolcache'
-const releasesURL = 'https://github.com/ruby/ruby-builder/releases'
+const releasesURL = 'https://github.com/philr/ruby-builder/releases'
 
 const windows = common.windows
 
@@ -75,7 +75,7 @@ function getDownloadURL(platform, engine, version) {
   }
 
   if (common.isHeadVersion(version)) {
-    return getLatestHeadBuildURL(builderPlatform, engine, version)
+    throw new Error('Head versions are not available');
   } else {
     return `${releasesURL}/download/${builderReleaseTag}/${engine}-${version}-${builderPlatform}.tar.gz`
   }

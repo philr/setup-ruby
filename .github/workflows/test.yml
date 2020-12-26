@@ -16,22 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-18.04, ubuntu-20.04, macos-10.15, macos-11.0, windows-2016, windows-2019 ]
-        # Use various version syntax here for testing
-        ruby: [ 2.1, 2.2, 2.3, 2.4, 2.5, 2.6.6, 2.7, '3.0', ruby-head, jruby, jruby-head, truffleruby, truffleruby-head ]
-        include:
-        - { os: windows-2016, ruby: mingw }
-        - { os: windows-2019, ruby: mingw }
-        - { os: windows-2019, ruby: mswin }
-        exclude:
-        - { os: windows-2016, ruby: '3.0' }
-        - { os: windows-2016, ruby: debug }
-        - { os: windows-2016, ruby: truffleruby }
-        - { os: windows-2016, ruby: truffleruby-head }
-        - { os: windows-2019, ruby: '3.0' }
-        - { os: windows-2019, ruby: debug }
-        - { os: windows-2019, ruby: truffleruby }
-        - { os: windows-2019, ruby: truffleruby-head }
-        - { os: macos-11.0, ruby: truffleruby }
+        ruby: [ 2.0 ]
 
     name: ${{ matrix.os }} ${{ matrix.ruby }}
     runs-on: ${{ matrix.os }}
@@ -109,9 +94,9 @@ jobs:
     - uses: actions/checkout@v2
     - uses: ./
       with:
-        ruby-version: 2.6
-        bundler: 2.1.4
-    - run: bundle --version | grep -F "Bundler version 2.1.4"
+        ruby-version: 2.0
+        bundler: 1.17.3
+    - run: bundle --version | grep -F "Bundler version 1.17.3"
 
   testDependencyOnBundler1:
     name: "Test gemfile depending on Bundler 1"
@@ -122,7 +107,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: ./
         with:
-          ruby-version: 2.7
+          ruby-version: 2.0
           bundler: 1
           bundler-cache: true
       - run: bundle --version | grep -F "Bundler version 1."
@@ -131,7 +116,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        gemfile: [ rails5, rails6 ]
+        gemfile: [ rails4 ]
     name: "Test with ${{ matrix.gemfile }} gemfile"
     runs-on: ubuntu-latest
     env:
@@ -140,7 +125,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: ./
         with:
-          ruby-version: 2.6
+          ruby-version: 2.0
           bundler-cache: true
       - run: bundle exec rails --version
 
