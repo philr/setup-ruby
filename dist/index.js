@@ -28202,7 +28202,19 @@ exports.debug = debug; // for test
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "versions", function() { return versions; });
 const versions = {
+  "2.0.0": "https://dl.bintray.com/oneclick/rubyinstaller/ruby-2.0.0-p648-x64-mingw32.7z",
+  "2.1.3": "https://dl.bintray.com/oneclick/rubyinstaller/ruby-2.1.3-x64-mingw32.7z",
+  "2.1.4": "https://dl.bintray.com/oneclick/rubyinstaller/ruby-2.1.4-x64-mingw32.7z",
+  "2.1.5": "https://dl.bintray.com/oneclick/rubyinstaller/ruby-2.1.5-x64-mingw32.7z",
+  "2.1.6": "https://dl.bintray.com/oneclick/rubyinstaller/ruby-2.1.6-x64-mingw32.7z",
+  "2.1.7": "https://dl.bintray.com/oneclick/rubyinstaller/ruby-2.1.7-x64-mingw32.7z",
+  "2.1.8": "https://dl.bintray.com/oneclick/rubyinstaller/ruby-2.1.8-x64-mingw32.7z",
   "2.1.9": "https://dl.bintray.com/oneclick/rubyinstaller/ruby-2.1.9-x64-mingw32.7z",
+  "2.2.1": "https://dl.bintray.com/oneclick/rubyinstaller/ruby-2.2.1-x64-mingw32.7z",
+  "2.2.2": "https://dl.bintray.com/oneclick/rubyinstaller/ruby-2.2.2-x64-mingw32.7z",
+  "2.2.3": "https://dl.bintray.com/oneclick/rubyinstaller/ruby-2.2.3-x64-mingw32.7z",
+  "2.2.4": "https://dl.bintray.com/oneclick/rubyinstaller/ruby-2.2.4-x64-mingw32.7z",
+  "2.2.5": "https://dl.bintray.com/oneclick/rubyinstaller/ruby-2.2.5-x64-mingw32.7z",
   "2.2.6": "https://dl.bintray.com/oneclick/rubyinstaller/ruby-2.2.6-x64-mingw32.7z",
   "2.3.0": "https://dl.bintray.com/oneclick/rubyinstaller/ruby-2.3.0-x64-mingw32.7z",
   "2.3.1": "https://dl.bintray.com/oneclick/rubyinstaller/ruby-2.3.1-x64-mingw32.7z",
@@ -28222,14 +28234,14 @@ const versions = {
   "2.5.5": "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-2.5.5-1/rubyinstaller-2.5.5-1-x64.7z",
   "2.5.6": "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-2.5.6-1/rubyinstaller-2.5.6-1-x64.7z",
   "2.5.7": "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-2.5.7-1/rubyinstaller-2.5.7-1-x64.7z",
-  "2.5.8": "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-2.5.8-1/rubyinstaller-2.5.8-1-x64.7z",
+  "2.5.8": "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-2.5.8-2/rubyinstaller-2.5.8-2-x64.7z",
   "2.6.0": "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-2.6.0-1/rubyinstaller-2.6.0-1-x64.7z",
   "2.6.1": "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-2.6.1-1/rubyinstaller-2.6.1-1-x64.7z",
   "2.6.2": "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-2.6.2-1/rubyinstaller-2.6.2-1-x64.7z",
   "2.6.3": "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-2.6.3-1/rubyinstaller-2.6.3-1-x64.7z",
   "2.6.4": "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-2.6.4-1/rubyinstaller-2.6.4-1-x64.7z",
   "2.6.5": "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-2.6.5-1/rubyinstaller-2.6.5-1-x64.7z",
-  "2.6.6": "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-2.6.6-1/rubyinstaller-2.6.6-1-x64.7z",
+  "2.6.6": "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-2.6.6-2/rubyinstaller-2.6.6-2-x64.7z",
   "2.7.0": "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-2.7.0-1/rubyinstaller-2.7.0-1-x64.7z",
   "2.7.1": "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-2.7.1-1/rubyinstaller-2.7.1-1-x64.7z",
   "2.7.2": "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-2.7.2-1/rubyinstaller-2.7.2-1-x64.7z",
@@ -45185,25 +45197,7 @@ __webpack_require__.r(__webpack_exports__);
 function getVersions(platform) {
   const versions = {
     "ruby": [
-      "2.1.9",
-      "2.2.10",
-      "2.3.0", "2.3.1", "2.3.2", "2.3.3", "2.3.4", "2.3.5", "2.3.6", "2.3.7", "2.3.8",
-      "2.4.0", "2.4.1", "2.4.2", "2.4.3", "2.4.4", "2.4.5", "2.4.6", "2.4.7", "2.4.9", "2.4.10",
-      "2.5.0", "2.5.1", "2.5.2", "2.5.3", "2.5.4", "2.5.5", "2.5.6", "2.5.7", "2.5.8",
-      "2.6.0", "2.6.1", "2.6.2", "2.6.3", "2.6.4", "2.6.5", "2.6.6",
-      "2.7.0", "2.7.1", "2.7.2",
-      "3.0.0-preview1", "3.0.0-preview2", "3.0.0-rc1", "3.0.0",
-      "head", "debug",
-    ],
-    "jruby": [
-      "9.1.17.0",
-      "9.2.9.0", "9.2.10.0", "9.2.11.0", "9.2.11.1", "9.2.12.0", "9.2.13.0", "9.2.14.0",
-      "head"
-    ],
-    "truffleruby": [
-      "19.3.0", "19.3.1",
-      "20.0.0", "20.1.0", "20.2.0", "20.3.0",
-      "head"
+      "2.0.0-p648",
     ]
   }
 
@@ -53584,7 +53578,7 @@ const common = __webpack_require__(390)
 const rubyBuilderVersions = __webpack_require__(694)
 
 const builderReleaseTag = 'toolcache'
-const releasesURL = 'https://github.com/ruby/ruby-builder/releases'
+const releasesURL = 'https://github.com/philr/ruby-builder/releases'
 
 const windows = common.windows
 
@@ -53652,7 +53646,7 @@ function getDownloadURL(platform, engine, version) {
   }
 
   if (common.isHeadVersion(version)) {
-    return getLatestHeadBuildURL(builderPlatform, engine, version)
+    throw new Error('Head versions are not available');
   } else {
     return `${releasesURL}/download/${builderReleaseTag}/${engine}-${version}-${builderPlatform}.tar.gz`
   }
