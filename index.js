@@ -9,6 +9,7 @@ const common = require('./common')
 const windows = common.windows
 
 const inputDefaults = {
+  'architecture': 'x64',
   'ruby-version': 'default',
   'bundler': 'default',
   'bundler-cache': 'true',
@@ -37,6 +38,7 @@ export async function setupRuby(options = {}) {
 
   const platform = common.getVirtualEnvironmentName()
   const [engine, parsedVersion] = parseRubyEngineAndVersion(inputs['ruby-version'])
+  const architecture = inputs['architecture']
 
   let installer
   if (platform.startsWith('windows-') && engine === 'ruby') {
@@ -45,13 +47,13 @@ export async function setupRuby(options = {}) {
     installer = require('./ruby-builder')
   }
 
-  const engineVersions = installer.getAvailableVersions(platform, engine)
+  const engineVersions = installer.getAvailableVersions(platform, engine, architecture)
   const version = validateRubyEngineAndVersion(platform, engineVersions, engine, parsedVersion)
 
   createGemRC()
   envPreInstall()
 
-  const rubyPrefix = await installer.install(platform, engine, version)
+  const rubyPrefix = await installer.install(platform, engine, architecture, version)
 
   // When setup-ruby is used by other actions, this allows code in them to run
   // before 'bundle install'.  Installed dependencies may require additional

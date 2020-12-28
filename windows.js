@@ -16,20 +16,22 @@ const drive = common.drive
 // needed for 2.0, 2.1, 2.2, 2.3, and mswin, cert file used by Git for Windows
 const certFile = 'C:\\Program Files\\Git\\mingw64\\ssl\\cert.pem'
 
-// location & path for old RubyInstaller DevKit (MSYS), Ruby 2.1, 2.2 and 2.3
-const msys = `${drive}:\\DevKit64`
-const msysPathEntries = [`${msys}\\mingw\\x86_64-w64-mingw32\\bin`, `${msys}\\mingw\\bin`, `${msys}\\bin`]
+// location & path for old RubyInstaller DevKit (MSYS), Ruby 2.0, 2.1, 2.2 and 2.3
+const msysX64 = `${drive}:\\DevKit64`
+const msysX86 = `${drive}:\\DevKit`
+const msysPathEntriesX64 = [`${msysX64}\\mingw\\x86_64-w64-mingw32\\bin`, `${msysX64}\\mingw\\bin`, `${msysX64}\\bin`]
+const msysPathEntriesX86 = [`${msysX86}\\mingw\\i686-w64-mingw32\\bin`, `${msysX86}\\mingw\\bin`, `${msysX86}\\bin`]
 
-export function getAvailableVersions(platform, engine) {
+export function getAvailableVersions(platform, engine, architecture) {
   if (engine === 'ruby') {
-    return Object.keys(rubyInstallerVersions)
+    return Object.keys(rubyInstallerVersions[architecture])
   } else {
     return undefined
   }
 }
 
-export async function install(platform, engine, version) {
-  const url = rubyInstallerVersions[version]
+export async function install(platform, engine, architecture, version) {
+  const url = rubyInstallerVersions[architecture][version]
 
   if (!url.endsWith('.7z')) {
     throw new Error(`URL should end in .7z: ${url}`)
@@ -38,17 +40,17 @@ export async function install(platform, engine, version) {
 
   let rubyPrefix, inToolCache
   if (common.shouldUseToolCache(engine, version)) {
-    inToolCache = tc.find('Ruby', version)
+    inToolCache = architecture === 'x64' && tc.find('Ruby', version)
     if (inToolCache) {
       rubyPrefix = inToolCache
     } else {
-      rubyPrefix = common.getToolCacheRubyPrefix(platform, version)
+      rubyPrefix = common.getToolCacheRubyPrefix(platform, architecture, version)
     }
   } else {
     rubyPrefix = `${drive}:\\${base}`
   }
 
-  let toolchainPaths = (version === 'mswin') ? await setupMSWin() : await setupMingw(version)
+  let toolchainPaths = (version === 'mswin') ? await setupMSWin() : await setupMingw(architecture, version)
 
   common.setupPath([`${rubyPrefix}\\bin`, ...toolchainPaths])
 
@@ -79,22 +81,25 @@ async function downloadAndExtract(engine, version, url, base, rubyPrefix) {
   }
 }
 
-async function setupMingw(version) {
+async function setupMingw(architecture, version) {
   core.exportVariable('MAKE', 'make.exe')
 
   if (version.match(/^2\.[0123]/)) {
     core.exportVariable('SSL_CERT_FILE', certFile)
-    await common.measure('Installing MSYS', async () => installMSYS(version))
-    return msysPathEntries
+    await common.measure('Installing MSYS', async () => installMSYS(architecture, version))
+    return architecture === 'x86' ? msysPathEntriesX86 : msysPathEntriesX64
   } else {
     return []
   }
 }
 
 // Ruby 2.0, 2.1, 2.2 and 2.3
-async function installMSYS(version) {
-  const url = 'https://dl.bintray.com/oneclick/rubyinstaller/DevKit-mingw64-64-4.7.2-20130224-1432-sfx.exe'
+async function installMSYS(architecture, version) {
+  const url = architecture === 'x86'
+    ? 'https://dl.bintray.com/oneclick/rubyinstaller/DevKit-mingw64-32-4.7.2-20130224-1151-sfx.exe'
+    : 'https://dl.bintray.com/oneclick/rubyinstaller/DevKit-mingw64-64-4.7.2-20130224-1432-sfx.exe'
   const downloadPath = await tc.downloadTool(url)
+  const msys = architecture === 'x86' ? msysX86 : msysX86
   await exec.exec('7z', ['x', downloadPath, `-o${msys}`], { silent: true })
 
   // below are set in the old devkit.rb file ?

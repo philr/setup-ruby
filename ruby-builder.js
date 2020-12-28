@@ -11,18 +11,21 @@ const releasesURL = 'https://github.com/philr/ruby-builder/releases'
 
 const windows = common.windows
 
-export function getAvailableVersions(platform, engine) {
+export function getAvailableVersions(platform, engine, architecture) {
+  if (architecture !== 'x64') return undefined;
   return rubyBuilderVersions.getVersions(platform)[engine]
 }
 
-export async function install(platform, engine, version) {
+export async function install(platform, engine, architecture, version) {
+  if (architecture !== 'x64') throw new Error(`Unsupported architecture: ${architecture}`);
+
   let rubyPrefix, inToolCache
   if (common.shouldUseToolCache(engine, version)) {
     inToolCache = tc.find('Ruby', version)
     if (inToolCache) {
       rubyPrefix = inToolCache
     } else {
-      rubyPrefix = common.getToolCacheRubyPrefix(platform, version)
+      rubyPrefix = common.getToolCacheRubyPrefix(platform, architecture, version)
     }
   } else if (windows) {
     rubyPrefix = path.join(`${common.drive}:`, `${engine}-${version}`)

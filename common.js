@@ -113,9 +113,9 @@ function getPlatformToolCache(platform) {
   }
 }
 
-export function getToolCacheRubyPrefix(platform, version) {
+export function getToolCacheRubyPrefix(platform, architecture, version) {
   const toolCache = getPlatformToolCache(platform)
-  return path.join(toolCache, 'Ruby', version, 'x64')
+  return path.join(toolCache, 'Ruby', version, architecture)
 }
 
 export function createToolCacheCompleteFile(toolCacheRubyPrefix) {

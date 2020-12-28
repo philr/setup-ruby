@@ -17,8 +17,37 @@ jobs:
       matrix:
         os: [ ubuntu-18.04, ubuntu-20.04, macos-10.15, macos-11.0, windows-2016, windows-2019 ]
         ruby: [ '2.0' ]
+        architecture: [ x64 ]
+        include:
+          - os: windows-2019
+            ruby: '2.0'
+            architecture: x86
+          - os: windows-2019
+            ruby: '2.1'
+            architecture: x86
+          - os: windows-2019
+            ruby: '2.2'
+            architecture: x86
+          - os: windows-2019
+            ruby: '2.3'
+            architecture: x86
+          - os: windows-2019
+            ruby: '2.4'
+            architecture: x86
+          - os: windows-2019
+            ruby: '2.5'
+            architecture: x86
+          - os: windows-2019
+            ruby: '2.6'
+            architecture: x86
+          - os: windows-2019
+            ruby: '2.7'
+            architecture: x86
+          - os: windows-2019
+            ruby: '3.0'
+            architecture: x86
 
-    name: ${{ matrix.os }} ${{ matrix.ruby }}
+    name: ${{ matrix.os }} ${{ matrix.ruby }} (${{matrix.architecture}})
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
@@ -26,6 +55,7 @@ jobs:
     - uses: ./
       with:
         ruby-version: ${{ matrix.ruby }}
+        architecture: ${{ matrix.architecture }}
         bundler-cache: true
     - run: ruby -v
     - name: PATH
