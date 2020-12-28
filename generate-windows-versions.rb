@@ -2,7 +2,7 @@ require 'net/http'
 require 'yaml'
 require 'json'
 
-min_requirements = ['>= 2.0.0'].map { |req| Gem::Requirement.new(req) }
+min_requirements = ['~> 2.0.0'].map { |req| Gem::Requirement.new(req) }
 
 url = 'https://raw.githubusercontent.com/oneclick/rubyinstaller.org-website/master/_data/downloads.yaml'
 entries = YAML.load(Net::HTTP.get(URI(url)), symbolize_names: true)
@@ -29,11 +29,7 @@ versions.each { |architecture, arch_versions|
   versions[architecture] = arch_versions.map { | _, version, entry |
     [version, entry[:href]]
   }.to_h
-  versions[architecture]['head'] = "https://github.com/oneclick/rubyinstaller2/releases/download/rubyinstaller-head/rubyinstaller-head-#{architecture}.7z"
 }
-
-versions['x64']['mingw'] = 'https://github.com/MSP-Greg/ruby-loco/releases/download/ruby-master/ruby-mingw.7z'
-versions['x64']['mswin'] = 'https://github.com/MSP-Greg/ruby-loco/releases/download/ruby-master/ruby-mswin.7z'
 
 js = "export const versions = #{JSON.pretty_generate(versions)}\n"
 File.write 'windows-versions.js', js
