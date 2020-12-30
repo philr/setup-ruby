@@ -80,7 +80,7 @@ jobs:
     - name: Subprocess test
       run: ruby test_subprocess.rb
     - name: OpenSSL version
-      run: ruby -ropenssl -e 'puts OpenSSL::OPENSSL_LIBRARY_VERSION'
+      run: ruby -ropenssl -e 'puts OpenSSL::OPENSSL_LIBRARY_VERSION if OpenSSL.const_defined?(:OPENSSL_LIBRARY_VERSION)'
     - name: OpenSSL test
       run: ruby -ropen-uri -e 'puts URI.send(:open, %{https://rubygems.org/}) { |f| f.read(1024) }'
 
