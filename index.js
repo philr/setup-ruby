@@ -50,10 +50,11 @@ export async function setupRuby(options = {}) {
   const engineVersions = installer.getAvailableVersions(platform, engine, architecture)
   const version = validateRubyEngineAndVersion(platform, engineVersions, engine, parsedVersion)
 
-  createGemRC()
   envPreInstall()
 
   const rubyPrefix = await installer.install(platform, engine, architecture, version)
+
+  await createGemRC(rubyPrefix)
 
   // When setup-ruby is used by other actions, this allows code in them to run
   // before 'bundle install'.  Installed dependencies may require additional
@@ -155,10 +156,10 @@ function validateRubyEngineAndVersion(platform, engineVersions, engine, parsedVe
   return version
 }
 
-function createGemRC() {
+async function createGemRC(rubyPrefix) {
   const gemrc = path.join(os.homedir(), '.gemrc')
   if (!fs.existsSync(gemrc)) {
-    fs.writeFileSync(gemrc, `gem: --no-document${os.EOL}`)
+    fs.writeFileSync(gemrc, `gem: --${await gemIsV2OrLater(rubyPrefix) ? 'no-document' : 'no-rdoc --no-ri'}${os.EOL}`)
   }
 }
 
@@ -214,7 +215,7 @@ async function installBundler(bundlerVersionInput, lockFile, platform, rubyPrefi
     throw new Error(`Cannot parse bundler input: ${bundlerVersion}`)
   }
 
-  if (engine === 'ruby' && rubyVersion.match(/^2\.[012]/)) {
+  if (engine === 'ruby' && rubyVersion.match(/^(1\.|2\.[012])/)) {
     console.log('Bundler 2 requires Ruby 2.3+, using Bundler 1 on Ruby <= 2.2')
     bundlerVersion = '1'
   } else if (engine === 'ruby' && rubyVersion.startsWith('2.3')) {
@@ -232,6 +233,11 @@ async function installBundler(bundlerVersionInput, lockFile, platform, rubyPrefi
   } else {
     const gem = path.join(rubyPrefix, 'bin', 'gem')
     const args = ['install', 'bundler', '-v', `~> ${bundlerVersion}`, '--no-document']
+    if (await gemIsV2OrLater(rubyPrefix)) {
+      args.push('--no-document')
+    } else {
+      args.push('--no-rdoc', '--no-ri')
+    }
     if (rubyVersion.startsWith('1.8.7')) {
       // Don't overwrite the patched copy of bundler (enabling SSL SNI) included in the package.
       args.push('--conservative')
@@ -241,6 +247,21 @@ async function installBundler(bundlerVersionInput, lockFile, platform, rubyPrefi
 
   return bundlerVersion
 }
+
+async function gemIsV2OrLater(rubyPrefix) {
+  const gem = path.join(rubyPrefix, 'bin', 'gem')
+  let output = ''
+  const options = {
+    listeners: {
+      stdout: (data) => {
+        output += data.toString()
+      }
+    }
+  }
+  await exec.exec(gem, ['-v'], options)
+  return !output.match(/^[01]\./)
+}
+
 
 async function bundleInstall(gemfile, lockFile, platform, engine, rubyVersion, bundlerVersion) {
   if (gemfile === null) {
