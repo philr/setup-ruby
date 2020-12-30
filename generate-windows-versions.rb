@@ -2,7 +2,7 @@ require 'net/http'
 require 'yaml'
 require 'json'
 
-requirements = [['>= 1.8.7', '!= 1.9.2', '< 2.1']].map { |req| Gem::Requirement.new(req) }
+requirements = [['>= 2.0.0', '< 2.1']].map { |req| Gem::Requirement.new(req) }
 
 url = 'https://raw.githubusercontent.com/oneclick/rubyinstaller.org-website/master/_data/downloads.yaml'
 entries = YAML.load(Net::HTTP.get(URI(url)), symbolize_names: true)
@@ -30,6 +30,8 @@ versions.each { |architecture, arch_versions|
     [version, entry[:href]]
   }.to_h
 }
+
+versions['x86']['1.9.3'] = 'https://github.com/philr/rubyinstaller/releases/download/1.9.3-p551-openssl-tls-1.1-1.2/ruby-1.9.3-p551-i386-mingw32.7z'
 
 js = "export const versions = #{JSON.pretty_generate(versions)}\n"
 File.write 'windows-versions.js', js
