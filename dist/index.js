@@ -27753,10 +27753,10 @@ const rubyInstallerVersions = __webpack_require__(223).versions
 
 const drive = common.drive
 
-// needed for 2.0, 2.1, 2.2, 2.3, and mswin, cert file used by Git for Windows
+// needed for 1.9.3, 2.0, 2.1, 2.2, 2.3, and mswin, cert file used by Git for Windows
 const certFile = 'C:\\Program Files\\Git\\mingw64\\ssl\\cert.pem'
 
-// location & path for old RubyInstaller DevKit (MSYS), Ruby 2.0, 2.1, 2.2 and 2.3
+// location & path for old RubyInstaller DevKit (MSYS), Ruby 1.9.3, 2.0, 2.1, 2.2 and 2.3
 const msysX64 = `${drive}:\\DevKit64`
 const msysX86 = `${drive}:\\DevKit`
 const msysPathEntriesX64 = [`${msysX64}\\mingw\\x86_64-w64-mingw32\\bin`, `${msysX64}\\mingw\\bin`, `${msysX64}\\bin`]
@@ -27824,7 +27824,7 @@ async function downloadAndExtract(engine, version, url, base, rubyPrefix) {
 async function setupMingw(architecture, version) {
   core.exportVariable('MAKE', 'make.exe')
 
-  if (version.match(/^2\.[0123]/)) {
+  if (version.match(/^(1\.|2\.[0123])/)) {
     core.exportVariable('SSL_CERT_FILE', certFile)
     await common.measure('Installing MSYS', async () => installMSYS(architecture, version))
     return architecture === 'x86' ? msysPathEntriesX86 : msysPathEntriesX64
@@ -27833,7 +27833,7 @@ async function setupMingw(architecture, version) {
   }
 }
 
-// Ruby 2.0, 2.1, 2.2 and 2.3
+// Ruby 1.9.3, 2.0, 2.1, 2.2 and 2.3
 async function installMSYS(architecture, version) {
   const url = architecture === 'x86'
     ? 'https://dl.bintray.com/oneclick/rubyinstaller/DevKit-mingw64-32-4.7.2-20130224-1151-sfx.exe'
