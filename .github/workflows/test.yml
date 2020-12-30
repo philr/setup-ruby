@@ -85,7 +85,7 @@ jobs:
       run: ruby -ropen-uri -e 'puts URI.send(:open, %{https://rubygems.org/}) { |f| f.read(1024) }'
 
     - name: C extension test
-      run: gem install json:2.2.0 --no-document
+      run: gem install json -v 1.8.6
     - run: bundle --version
     # This step is redundant with `bundler-cache: true` but is there to check a redundant `bundle install` still works
     - run: bundle install
