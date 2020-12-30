@@ -232,7 +232,7 @@ async function installBundler(bundlerVersionInput, lockFile, platform, rubyPrefi
     console.log(`Using Bundler 1 shipped with ${engine}`)
   } else {
     const gem = path.join(rubyPrefix, 'bin', 'gem')
-    const args = ['install', 'bundler', '-v', `~> ${bundlerVersion}`]
+    const args = ['install', 'bundler', '-v', `~> ${bundlerVersion}`, '--force']
     if (await gemIsV2OrLater(rubyPrefix)) {
       args.push('--no-document')
     } else {
