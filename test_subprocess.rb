@@ -5,7 +5,8 @@ puts "CPPFLAGS: #{RbConfig::CONFIG["CPPFLAGS"]}"
 
 $stderr = StringIO.new
 begin
-  system RbConfig.ruby, "-e", "p :OK"
+  ruby = File.join(RbConfig::CONFIG['bindir'], RbConfig::CONFIG['ruby_install_name'] + RbConfig::CONFIG['EXEEXT'])
+  system ruby, "-e", "p :OK"
   out = $stderr.string
 ensure
   $stderr = STDERR

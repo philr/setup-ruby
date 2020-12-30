@@ -28208,6 +28208,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "versions", function() { return versions; });
 const versions = {
   "x86": {
+    "1.8.7": "https://dl.bintray.com/oneclick/rubyinstaller/ruby-1.8.7-p374-i386-mingw32.7z",
+    "1.9.3": "https://dl.bintray.com/oneclick/rubyinstaller/ruby-1.9.3-p551-i386-mingw32.7z",
     "2.0.0": "https://dl.bintray.com/oneclick/rubyinstaller/ruby-2.0.0-p648-i386-mingw32.7z"
   },
   "x64": {
@@ -45162,7 +45164,9 @@ __webpack_require__.r(__webpack_exports__);
 function getVersions(platform) {
   const versions = {
     "ruby": [
-      "2.0.0-p648",
+      "1.8.7-p375",
+      "1.9.3-p551",
+      "2.0.0-p648"
     ]
   }
 
@@ -52018,7 +52022,12 @@ async function installBundler(bundlerVersionInput, lockFile, platform, rubyPrefi
     console.log(`Using Bundler 1 shipped with ${engine}`)
   } else {
     const gem = path.join(rubyPrefix, 'bin', 'gem')
-    await exec.exec(gem, ['install', 'bundler', '-v', `~> ${bundlerVersion}`, '--no-document'])
+    const args = ['install', 'bundler', '-v', `~> ${bundlerVersion}`, '--no-document']
+    if (rubyVersion.startsWith('1.8.7')) {
+      // Don't overwrite the patched copy of bundler (enabling SSL SNI) included in the package.
+      args.push('--conservative')
+    }
+    await exec.exec(gem, args)
   }
 
   return bundlerVersion

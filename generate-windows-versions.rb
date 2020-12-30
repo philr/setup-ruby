@@ -2,7 +2,7 @@ require 'net/http'
 require 'yaml'
 require 'json'
 
-min_requirements = ['~> 2.0.0'].map { |req| Gem::Requirement.new(req) }
+requirements = [['>= 1.8.7', '!= 1.9.2', '< 2.1']].map { |req| Gem::Requirement.new(req) }
 
 url = 'https://raw.githubusercontent.com/oneclick/rubyinstaller.org-website/master/_data/downloads.yaml'
 entries = YAML.load(Net::HTTP.get(URI(url)), symbolize_names: true)
@@ -20,7 +20,7 @@ versions = entries.select { |entry|
 }.sort_by { |architecture, version, entry|
   Gem::Version.new(version)
 }.select { |architecture, version, entry|
-  min_requirements.any? { |req| req.satisfied_by?(Gem::Version.new(version)) }
+  requirements.any? { |req| req.satisfied_by?(Gem::Version.new(version)) }
 }.group_by { |architecture, version, entry|
   architecture
 }

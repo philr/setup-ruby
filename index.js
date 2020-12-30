@@ -231,7 +231,12 @@ async function installBundler(bundlerVersionInput, lockFile, platform, rubyPrefi
     console.log(`Using Bundler 1 shipped with ${engine}`)
   } else {
     const gem = path.join(rubyPrefix, 'bin', 'gem')
-    await exec.exec(gem, ['install', 'bundler', '-v', `~> ${bundlerVersion}`, '--no-document'])
+    const args = ['install', 'bundler', '-v', `~> ${bundlerVersion}`, '--no-document']
+    if (rubyVersion.startsWith('1.8.7')) {
+      // Don't overwrite the patched copy of bundler (enabling SSL SNI) included in the package.
+      args.push('--conservative')
+    }
+    await exec.exec(gem, args)
   }
 
   return bundlerVersion
