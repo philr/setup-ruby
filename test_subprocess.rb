@@ -7,7 +7,7 @@ $stderr = StringIO.new
 begin
   ruby = File.join(RbConfig::CONFIG['bindir'], RbConfig::CONFIG['ruby_install_name'] + RbConfig::CONFIG['EXEEXT'])
   system ruby, "-e", "p :OK"
-  if RUBY_ENGINE == 'jruby'
+  if defined?(RUBY_ENGINE) && RUBY_ENGINE == 'jruby'
     out = []
     $stderr.rewind
     $stderr.each_line do |s|
