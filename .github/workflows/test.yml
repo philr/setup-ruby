@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-16.04, ubuntu-18.04, ubuntu-20.04, macos-10.15, macos-11.0 ]
-        ruby: [ '1.8.7', '1.9.3', '2.0' ]
+        ruby: [ '1.8.7', '1.9.3', '2.0', jruby-1.7, jruby-9.0 ]
         architecture: [ x64 ]
         exclude:
           - os: macos-10.15
@@ -37,6 +37,9 @@ jobs:
             architecture: x64
           - os: windows-2016
             ruby: '2.0'
+            architecture: x64
+          - os: windows-2019
+            ruby: 'jruby-9.0'
             architecture: x64
 
     name: ${{ matrix.os }} ${{ matrix.ruby }} (${{matrix.architecture}})
