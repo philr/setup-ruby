@@ -116,9 +116,15 @@ jobs:
     - name: bash test
       shell: bash
       run: echo ~
+
+    # Install sassc's ffi dependency separately because RubyGems tries to
+    # use a version incompatible with JRuby 9.0.5.0.
+    - name: Windows JRuby - install ffi
+      if: startsWith(matrix.os, 'windows') && startsWith(matrix.ruby, 'jruby')
+      run: gem install ffi -v 1.12.2 ${{ steps.gemoptions.outputs.gemoptions }}
     - name: Windows JRuby
       if: startsWith(matrix.os, 'windows') && startsWith(matrix.ruby, 'jruby')
-      run: gem install sassc -N
+      run: gem install sassc -v 2.4.0 ${{ steps.gemoptions.outputs.gemoptions }}
 
   testExactBundlerVersion:
     name: "Test with an exact Bundler version"
