@@ -27764,6 +27764,24 @@ const msysPathEntriesX86 = [`${msysX86}\\mingw\\i686-w64-mingw32\\bin`, `${msysX
 
 function getAvailableVersions(platform, engine, architecture) {
   if (engine === 'ruby') {
+    if (architecture === 'default') {
+      let versions = new Set([...Object.keys(rubyInstallerVersions['x64']), ...Object.keys(rubyInstallerVersions['x86'])])
+      versions = [...versions];
+      versions.sort((v1, v2) => {
+        v1 = v1.split('.').map(v => parseInt(v, 10))
+        v2 = v2.split('.').map(v => parseInt(v, 10))
+        const len = Math.min(v1.length, v2.length)
+        for (let i = 0; i < len; i++) {
+          const diff = v1[i] - v2[i]
+          if (diff != 0) return diff
+        }
+
+        if (v1.length > len) return -1;
+        if (v2.length > len) return 1;
+        return 0;
+      })
+      return versions;
+    }
     return Object.keys(rubyInstallerVersions[architecture])
   } else {
     return undefined
@@ -27771,7 +27789,9 @@ function getAvailableVersions(platform, engine, architecture) {
 }
 
 async function install(platform, engine, architecture, version) {
-  const url = rubyInstallerVersions[architecture][version]
+  const selectedArch = getArchitecture(architecture, version)
+  if (!selectedArch) throw new Error(`Version '${version}' not found for architecture '${architecture}'`)
+  const url = rubyInstallerVersions[selectedArch][version]
 
   if (!url.endsWith('.7z')) {
     throw new Error(`URL should end in .7z: ${url}`)
@@ -27784,13 +27804,13 @@ async function install(platform, engine, architecture, version) {
     if (inToolCache) {
       rubyPrefix = inToolCache
     } else {
-      rubyPrefix = common.getToolCacheRubyPrefix(platform, architecture, version)
+      rubyPrefix = common.getToolCacheRubyPrefix(platform, selectedArch, version)
     }
   } else {
     rubyPrefix = `${drive}:\\${base}`
   }
 
-  let toolchainPaths = (version === 'mswin') ? await setupMSWin() : await setupMingw(architecture, version)
+  let toolchainPaths = (version === 'mswin') ? await setupMSWin() : await setupMingw(selectedArch, version)
 
   common.setupPath([`${rubyPrefix}\\bin`, ...toolchainPaths])
 
@@ -27799,6 +27819,29 @@ async function install(platform, engine, architecture, version) {
   }
 
   return rubyPrefix
+}
+
+function getArchitecture(architecture, version) {
+  if (architecture === 'default') {
+    if (rubyInstallerVersions['x64'][version]) {
+      console.log(`Using x64 version of ${version}`)
+      return 'x64'
+    }
+
+    if (rubyInstallerVersions['x86'][version]) {
+      console.log(`Using x86 version of ${version}`)
+      return 'x86'
+    }
+
+    return null
+  }
+
+  if (rubyInstallerVersions[architecture][version]) {
+    console.log(`Using ${architecture} version of ${version}`)
+    return architecture
+  }
+
+  return null
 }
 
 async function downloadAndExtract(engine, version, url, base, rubyPrefix) {
@@ -51834,6 +51877,10 @@ async function setupRuby(options = {}) {
   const [engine, parsedVersion] = parseRubyEngineAndVersion(inputs['ruby-version'])
   const architecture = inputs['architecture']
 
+  if (architecture !== 'x64' && architecture !== 'x86' && architecture !== 'default') {
+    throw new Error(`Invalid architecture: ${architecture}`);
+  }
+
   let installer
   if (platform.startsWith('windows-') && engine === 'ruby') {
     installer = __webpack_require__(216)
@@ -53583,12 +53630,12 @@ const releasesURL = 'https://github.com/philr/ruby-builder/releases'
 const windows = common.windows
 
 function getAvailableVersions(platform, engine, architecture) {
-  if (architecture !== 'x64') return undefined;
+  if (architecture === 'x86') return undefined;
   return rubyBuilderVersions.getVersions(platform)[engine]
 }
 
 async function install(platform, engine, architecture, version) {
-  if (architecture !== 'x64') throw new Error(`Unsupported architecture: ${architecture}`);
+  if (architecture === 'x86') throw new Error(`Unsupported architecture: ${architecture}`)
 
   let rubyPrefix, inToolCache
   if (common.shouldUseToolCache(engine, version)) {
@@ -53596,7 +53643,7 @@ async function install(platform, engine, architecture, version) {
     if (inToolCache) {
       rubyPrefix = inToolCache
     } else {
-      rubyPrefix = common.getToolCacheRubyPrefix(platform, architecture, version)
+      rubyPrefix = common.getToolCacheRubyPrefix(platform, 'x64', version)
     }
   } else if (windows) {
     rubyPrefix = path.join(`${common.drive}:`, `${engine}-${version}`)

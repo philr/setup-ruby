@@ -40,6 +40,10 @@ export async function setupRuby(options = {}) {
   const [engine, parsedVersion] = parseRubyEngineAndVersion(inputs['ruby-version'])
   const architecture = inputs['architecture']
 
+  if (architecture !== 'x64' && architecture !== 'x86' && architecture !== 'default') {
+    throw new Error(`Invalid architecture: ${architecture}`);
+  }
+
   let installer
   if (platform.startsWith('windows-') && engine === 'ruby') {
     installer = require('./windows')

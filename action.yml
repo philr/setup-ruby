@@ -6,9 +6,9 @@ branding:
   icon: download
 inputs:
   architecture:
-    description: 'Architecture to use for Windows Ruby Installer builds (either x64 or x86).'
+    description: 'Architecture to use for Windows Ruby Installer builds (either x64, x86 or default).'
     required: false
-    default: 'x64'
+    default: 'default'
   ruby-version:
     description: 'Engine and version to use, see the syntax in the README. Reads from .ruby-version or .tool-versions if unset.'
     required: false
