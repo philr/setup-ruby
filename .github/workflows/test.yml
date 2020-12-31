@@ -84,8 +84,16 @@ jobs:
     - name: OpenSSL test
       run: ruby -ropen-uri -e 'puts URI.send(:open, %{https://rubygems.org/}) { |f| f.read(1024) }'
 
+    - id: gemoptions
+      run: |
+        if gem help install | grep -q no-document; then
+          echo '::set-output name=gemoptions::--no-document'
+        else
+          echo '::set-output name=gemoptions::--no-rdoc --no-ri'
+        fi
+      shell: bash
     - name: C extension test
-      run: gem install json -v 1.8.6
+      run: gem install json -v 1.8.6 ${{ steps.gemoptions.outputs.gemoptions }}
     - run: bundle --version
     # This step is redundant with `bundler-cache: true` but is there to check a redundant `bundle install` still works
     - run: bundle install
