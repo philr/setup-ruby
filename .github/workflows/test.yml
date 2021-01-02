@@ -1,9 +1,9 @@
-name: Test this action
+name: Test this action (legacy)
 on:
   pull_request:
   push:
     branches-ignore:
-    - v1
+    - legacy-v1
     tags-ignore:
     - '*'
     paths-ignore:
