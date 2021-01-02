@@ -9,7 +9,8 @@ jobs:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
-    - run: |
+    - name: Push to the release branch
+      run: |
         echo $GITHUB_REF
         if [[ $GITHUB_REF == refs/tags/legacy-v1.* ]]; then
           git push origin HEAD:legacy-v1
