@@ -4,10 +4,13 @@ on:
     types: [published]
 jobs:
   release:
-    if: startsWith(env.GITHUB_REF, 'legacy-v1.')
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
-    - run: git push origin HEAD:legacy-v1
+    - run: |
+        echo $GITHUB_REF
+        if [[ $GITHUB_REF == refs/tags/legacy-v1.* ]]; then
+          git push origin HEAD:legacy-v1
+        fi
