@@ -27879,8 +27879,8 @@ async function setupMingw(architecture, version) {
 // Ruby 1.9.3, 2.0, 2.1, 2.2 and 2.3
 async function installMSYS(architecture, version) {
   const url = architecture === 'x86'
-    ? 'https://dl.bintray.com/oneclick/rubyinstaller/DevKit-mingw64-32-4.7.2-20130224-1151-sfx.exe'
-    : 'https://dl.bintray.com/oneclick/rubyinstaller/DevKit-mingw64-64-4.7.2-20130224-1432-sfx.exe'
+    ? 'https://github.com/oneclick/rubyinstaller/releases/download/devkit-4.7.2/DevKit-mingw64-32-4.7.2-20130224-1151-sfx.exe'
+    : 'https://github.com/oneclick/rubyinstaller/releases/download/devkit-4.7.2/DevKit-mingw64-64-4.7.2-20130224-1432-sfx.exe'
   const downloadPath = await tc.downloadTool(url)
   const msys = architecture === 'x86' ? msysX86 : msysX86
   await exec.exec('7z', ['x', downloadPath, `-o${msys}`], { silent: true })
@@ -28251,11 +28251,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "versions", function() { return versions; });
 const versions = {
   "x86": {
-    "2.0.0": "https://dl.bintray.com/oneclick/rubyinstaller/ruby-2.0.0-p648-i386-mingw32.7z",
+    "2.0.0": "https://github.com/philr/rubyinstaller/releases/download/2.0.0-p648/ruby-2.0.0-p648-i386-mingw32.7z",
     "1.9.3": "https://github.com/philr/rubyinstaller/releases/download/1.9.3-p551-openssl-tls-1.1-1.2-2/ruby-1.9.3-p551-i386-mingw32.7z"
   },
   "x64": {
-    "2.0.0": "https://dl.bintray.com/oneclick/rubyinstaller/ruby-2.0.0-p648-x64-mingw32.7z"
+    "2.0.0": "https://github.com/philr/rubyinstaller/releases/download/2.0.0-p648/ruby-2.0.0-p648-x64-mingw32.7z"
   }
 }
 

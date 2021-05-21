@@ -139,8 +139,8 @@ async function setupMingw(architecture, version) {
 // Ruby 1.9.3, 2.0, 2.1, 2.2 and 2.3
 async function installMSYS(architecture, version) {
   const url = architecture === 'x86'
-    ? 'https://dl.bintray.com/oneclick/rubyinstaller/DevKit-mingw64-32-4.7.2-20130224-1151-sfx.exe'
-    : 'https://dl.bintray.com/oneclick/rubyinstaller/DevKit-mingw64-64-4.7.2-20130224-1432-sfx.exe'
+    ? 'https://github.com/oneclick/rubyinstaller/releases/download/devkit-4.7.2/DevKit-mingw64-32-4.7.2-20130224-1151-sfx.exe'
+    : 'https://github.com/oneclick/rubyinstaller/releases/download/devkit-4.7.2/DevKit-mingw64-64-4.7.2-20130224-1432-sfx.exe'
   const downloadPath = await tc.downloadTool(url)
   const msys = architecture === 'x86' ? msysX86 : msysX86
   await exec.exec('7z', ['x', downloadPath, `-o${msys}`], { silent: true })
