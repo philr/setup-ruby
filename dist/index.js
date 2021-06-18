@@ -63513,6 +63513,7 @@ __nccwpck_require__.r(__webpack_exports__);
 /* harmony export */   "install": () => (/* binding */ install)
 /* harmony export */ });
 const os = __nccwpck_require__(2037)
+const fs = __nccwpck_require__(7147)
 const path = __nccwpck_require__(1017)
 const exec = __nccwpck_require__(1514)
 const io = __nccwpck_require__(7436)
@@ -63561,7 +63562,9 @@ async function downloadAndExtract(platform, engine, version, rubyPrefix) {
   const parentDir = path.dirname(rubyPrefix)
 
   await io.rmRF(rubyPrefix)
-  await io.mkdirP(parentDir)
+  if (!(fs.existsSync(parentDir) && fs.statSync(parentDir).isDirectory())) {
+    await io.mkdirP(parentDir)
+  }
 
   const downloadPath = await common.measure('Downloading Ruby', async () => {
     const url = getDownloadURL(platform, engine, version)
