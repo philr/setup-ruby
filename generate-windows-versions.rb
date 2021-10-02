@@ -31,7 +31,7 @@ versions.each { |architecture, arch_versions|
   }.to_h
 }
 
-versions['x86']['1.9.3'] = 'https://github.com/philr/rubyinstaller/releases/download/1.9.3-p551-openssl-tls-1.1-1.2/ruby-1.9.3-p551-i386-mingw32.7z'
+versions['x86']['1.9.3'] = 'https://github.com/philr/rubyinstaller/releases/download/1.9.3-p551-openssl-tls-1.1-1.2-2/ruby-1.9.3-p551-i386-mingw32.7z'
 
 js = "export const versions = #{JSON.pretty_generate(versions)}\n"
 File.write 'windows-versions.js', js
