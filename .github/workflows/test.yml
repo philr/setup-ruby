@@ -15,14 +15,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-18.04, ubuntu-20.04, macos-10.15, macos-11.0, windows-2019 ]
+        os: [ ubuntu-18.04, ubuntu-20.04, ubuntu-22.04, macos-10.15, macos-11, macos-12, windows-2019 ]
         ruby: [ '1.8.7', '1.9.3', '2.0', jruby-1.7, jruby-9.0 ]
         architecture: [ default ]
         exclude:
+          - os: ubuntu-22.04
+            ruby: '1.8.7'
+            architecture: default
           - os: macos-10.15
             ruby: '1.8.7'
             architecture: default
-          - os: macos-11.0
+          - os: macos-11
+            ruby: '1.8.7'
+            architecture: default
+          - os: macos-12
             ruby: '1.8.7'
             architecture: default
           - os: windows-2019
