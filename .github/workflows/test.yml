@@ -60,7 +60,7 @@ jobs:
     name: ${{ matrix.os }} ${{ matrix.ruby }} (${{matrix.architecture}})
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - uses: ./
       with:
@@ -146,7 +146,7 @@ jobs:
     name: "Test with an exact Bundler version"
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - uses: ./
       with:
         ruby-version: 2.0
@@ -159,7 +159,7 @@ jobs:
     env:
       BUNDLE_GEMFILE: gemfiles/bundler1.gemfile
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: ./
         with:
           ruby-version: 2.0
@@ -177,7 +177,7 @@ jobs:
     env:
       BUNDLE_GEMFILE: gemfiles/${{ matrix.gemfile }}.gemfile
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: ./
         with:
           ruby-version: 2.0
@@ -187,7 +187,7 @@ jobs:
   lint:
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - run: yarn install
     - run: yarn run package
     - name: Check generated files are up to date
