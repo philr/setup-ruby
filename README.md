@@ -15,7 +15,7 @@ This legacy version of the setup-ruby action currently supports these versions o
 | Interpreter | Versions |
 | ----------- | -------- |
 | `ruby` | 1.8.7-p375 (Ubuntu <= 20.04 only), 1.9.3-p551, 2.0.0-p648 |
-| `jruby` | 1.7.27 (Mac OS and Ubuntu only), 9.0.5.0 |
+| `jruby` | 1.7.27, 9.0.5.0 |
 
 On Windows, versions 1.8.7-p375 and 1.9.3-p551 are 32-bit x86 builds. Version 2.0.0-p648 is available as either a 32-bit x86 build or a 64-bit x64 build (selectable with the optional architecture input).
 

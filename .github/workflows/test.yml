@@ -34,14 +34,8 @@ jobs:
           - os: windows-2019
             ruby: '1.8.7'
             architecture: default
-          - os: windows-2019
-            ruby: 'jruby-1.7'
-            architecture: default
           - os: windows-2022
             ruby: '1.8.7'
-            architecture: default
-          - os: windows-2022
-            ruby: 'jruby-1.7'
             architecture: default
         include:
           - os: windows-2019
