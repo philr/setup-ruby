@@ -63136,7 +63136,7 @@ async function install(platform, engine, architecture, version) {
     await downloadAndExtract(engine, version, url, base, rubyPrefix);
   }
 
-  const msys2Type = common.setupPath([`${rubyPrefix}\\bin`, ...toolchainPaths])
+  common.setupPath([`${rubyPrefix}\\bin`, ...toolchainPaths])
 
   if (!hasMSYS2PreInstalled) {
     await installMSYS2Tools()
