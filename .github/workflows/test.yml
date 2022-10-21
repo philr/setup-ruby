@@ -93,9 +93,9 @@ jobs:
     - id: gemoptions
       run: |
         if gem help install | grep -q no-document; then
-          echo '::set-output name=gemoptions::--no-document'
+          echo 'gemoptions=--no-document' >> $GITHUB_OUTPUT
         else
-          echo '::set-output name=gemoptions::--no-rdoc --no-ri'
+          echo 'gemoptions=--no-rdoc --no-ri' >> $GITHUB_OUTPUT
         fi
       shell: bash
     - name: C extension test
