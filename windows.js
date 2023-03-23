@@ -19,7 +19,13 @@ const msys2BasePath = process.env['GHCUP_MSYS2']
 const vcPkgBasePath = process.env['VCPKG_INSTALLATION_ROOT']
 
 // needed for 1.9.3, 2.0, 2.1, 2.2, 2.3, and mswin, cert file used by Git for Windows
-const certFile = 'C:\\Program Files\\Git\\mingw64\\ssl\\cert.pem'
+let certFile = 'C:\\Program Files\\Git\\mingw64\\etc\\ssl\\cert.pem'
+if (!fs.existsSync(certFile)) {
+  certFile = 'C:\\Program Files\\Git\\mingw64\\ssl\\cert.pem'
+  if (!fs.existsSync(certFile)) {
+    throw new Error("Cannot find Git's cert file")
+  }
+}
 
 // location & path for old RubyInstaller DevKit (MSYS), Ruby 1.9.3, 2.0, 2.1, 2.2 and 2.3
 const msysX64 = `${drive}:\\DevKit64`
