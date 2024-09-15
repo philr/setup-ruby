@@ -84453,7 +84453,7 @@ async function setupRuby(options = {}) {
   const engineVersions = installer.getAvailableVersions(platform, engine, architecture)
   const version = validateRubyEngineAndVersion(platform, engineVersions, engine, parsedVersion)
 
-  envPreInstall()
+  envPreInstall(platform, engine)
 
   // JRuby can use compiled extension code, so make sure gcc exists.
   // As of Jan-2022, JRuby compiles against msvcrt.
@@ -84574,8 +84574,7 @@ async function createGemRC(rubyPrefix) {
 }
 
 // sets up ENV variables
-// currently only used on Windows runners
-function envPreInstall() {
+function envPreInstall(platform, engine) {
   const ENV = process.env
   if (windows) {
     // puts normal Ruby temp folder on SSD
@@ -84584,6 +84583,15 @@ function envPreInstall() {
     core.exportVariable('HOME', ENV['HOMEDRIVE'] + ENV['HOMEPATH'])
     // bash - needed to maintain Path from Windows
     core.exportVariable('MSYS2_PATH_TYPE', 'inherit')
+  } else if (platform.startsWith('macos-') && engine === 'jruby') {
+    // Use an older version of Java for compatiblity.
+    // macos-12 defaults to Java 8. Use Java 11 if 8 isn't available.
+    // macos-14 runs on arm (and doesn't include Java 8).
+    const javaHome = ENV['JAVA_HOME_8_X64'] || ENV['JAVA_HOME_11_X64'] || ENV['JAVA_HOME_11_arm64']
+    if (javaHome) {
+      core.info(`Setting JAVA_HOME=${javaHome}`)
+      core.exportVariable('JAVA_HOME', javaHome)
+    }
   }
 }
 
