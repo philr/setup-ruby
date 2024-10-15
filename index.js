@@ -184,16 +184,23 @@ function envPreInstall(platform, engine) {
     core.exportVariable('HOME', ENV['HOMEDRIVE'] + ENV['HOMEPATH'])
     // bash - needed to maintain Path from Windows
     core.exportVariable('MSYS2_PATH_TYPE', 'inherit')
-  } else if (platform.startsWith('macos-') && engine === 'jruby') {
-    // Use an older version of Java for compatiblity.
-    // macos-12 defaults to Java 8. Use Java 11 if 8 isn't available.
-    // macos-14 runs on arm (and doesn't include Java 8).
-    const javaHome = ENV['JAVA_HOME_8_X64'] || ENV['JAVA_HOME_11_X64'] || ENV['JAVA_HOME_11_arm64']
-    if (javaHome) {
-      core.info(`Setting JAVA_HOME=${javaHome}`)
-      core.exportVariable('JAVA_HOME', javaHome)
+  } else if (engine === 'jruby') {
+    if (platform === 'ubuntu-24.04') {
+      // Use Java 11 for compatibility.
+      setJavaHome(ENV['JAVA_HOME_11_X64'])
+    } else if (platform.startsWith('macos-')) {
+      // Use an older version of Java for compatibility.
+      // macos-12 defaults to Java 8. Use Java 11 if 8 isn't available.
+      // macos-14 runs on arm (and doesn't include Java 8).
+      const javaHome = ENV['JAVA_HOME_8_X64'] || ENV['JAVA_HOME_11_X64'] || ENV['JAVA_HOME_11_arm64']
+      if (javaHome) setJavaHome(javaHome)
     }
   }
+}
+
+function setJavaHome(javaHome) {
+  core.info(`Setting JAVA_HOME=${javaHome}`)
+  core.exportVariable('JAVA_HOME', javaHome)
 }
 
 function readBundledWithFromGemfileLock(lockFile) {
