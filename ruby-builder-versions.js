@@ -7,7 +7,9 @@ export function getVersions(platform) {
     ],
     "jruby": [
       "1.7.27",
-      "9.0.5.0"
+      "9.0.5.0",
+      "9.1.17.0",
+      "9.2.21.0"
     ]
   }
 

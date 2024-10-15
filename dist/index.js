@@ -88889,7 +88889,9 @@ function getVersions(platform) {
     ],
     "jruby": [
       "1.7.27",
-      "9.0.5.0"
+      "9.0.5.0",
+      "9.1.17.0",
+      "9.2.21.0"
     ]
   }
 
@@ -91604,6 +91606,12 @@ async function installBundler(bundlerVersionInput, lockFile, platform, rubyPrefi
   } else {
     const gem = path.join(rubyPrefix, 'bin', 'gem')
     const args = ['install', 'bundler', '-v', `~> ${bundlerVersion}`, '--force']
+
+    if (engine === 'jruby' && rubyVersion.match(/^9\.2\./)) {
+      console.log('JRuby 9.2 requires a maximum of Bundler 2.3')
+      args.push('-v', '< 2.4')
+    }
+
     if (await gemIsV2OrLater(rubyPrefix)) {
       args.push('--no-document')
     } else {
