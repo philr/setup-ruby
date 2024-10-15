@@ -124,7 +124,7 @@ jobs:
 
   testExactBundlerVersion:
     name: "Test with an exact Bundler version"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v4
     - uses: ./
@@ -135,7 +135,7 @@ jobs:
 
   testDependencyOnBundler1:
     name: "Test gemfile depending on Bundler 1"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       BUNDLE_GEMFILE: gemfiles/bundler1.gemfile
     steps:
@@ -153,7 +153,7 @@ jobs:
       matrix:
         gemfile: [ rails4 ]
     name: "Test with ${{ matrix.gemfile }} gemfile"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       BUNDLE_GEMFILE: gemfiles/${{ matrix.gemfile }}.gemfile
     steps:
