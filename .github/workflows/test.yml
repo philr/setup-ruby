@@ -17,7 +17,7 @@ jobs:
       matrix:
         # macos-14 (arm64) is currently not supported. x64 builds should work,
         # but aren't freely available.
-        os: [ ubuntu-20.04, ubuntu-22.04, macos-13, windows-2019, windows-2022 ]
+        os: [ ubuntu-20.04, ubuntu-22.04, ubuntu-24.04, macos-13, windows-2019, windows-2022 ]
         ruby: [ '1.8.7', '1.9.3', '2.0', jruby-1.7, jruby-9.0 ]
         architecture: [ default ]
         exclude:
