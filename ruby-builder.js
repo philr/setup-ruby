@@ -77,7 +77,15 @@ function getDownloadURL(platform, engine, version) {
   if (platform.startsWith('windows-')) {
     builderPlatform = 'windows-latest'
   } else if (platform.startsWith('macos-')) {
-    builderPlatform = 'macos-latest'
+    const arch = os.arch()
+    switch (arch) {
+      case 'arm64':
+        builderPlatform = 'macos-14-arm64'
+        break
+      default:
+        builderPlatform = 'macos-latest'
+        break
+    }
   }
 
   if (common.isHeadVersion(version)) {
