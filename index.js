@@ -184,14 +184,18 @@ function envPreInstall(platform, engine) {
     core.exportVariable('HOME', ENV['HOMEDRIVE'] + ENV['HOMEPATH'])
     // bash - needed to maintain Path from Windows
     core.exportVariable('MSYS2_PATH_TYPE', 'inherit')
-  } else if (engine === 'jruby') {
+  }
+
+  if (engine === 'jruby') {
     if (platform === 'ubuntu-24.04') {
       // Use Java 11 for compatibility.
       setJavaHome(ENV['JAVA_HOME_11_X64'])
-    } else if (platform.startsWith('macos-')) {
+    } else if (platform.startsWith('macos-') || windows) {
       // Use an older version of Java for compatibility.
       // macos-12 defaults to Java 8. Use Java 11 if 8 isn't available.
       // macos-14 runs on arm (and doesn't include Java 8).
+      // windows-2022 defaults to Java 8.
+      // windows-2025 defaults to Java 17. Use Java 8 instead.
       const javaHome = ENV['JAVA_HOME_8_X64'] || ENV['JAVA_HOME_11_X64'] || ENV['JAVA_HOME_11_arm64']
       if (javaHome) setJavaHome(javaHome)
     }
