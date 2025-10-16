@@ -228,7 +228,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.saveCache = exports.restoreCache = exports.isFeatureAvailable = exports.ReserveCacheError = exports.ValidationError = void 0;
+exports.saveCache = exports.restoreCache = exports.isFeatureAvailable = exports.FinalizeCacheError = exports.ReserveCacheError = exports.ValidationError = void 0;
 const core = __importStar(__nccwpck_require__(7484));
 const path = __importStar(__nccwpck_require__(6928));
 const utils = __importStar(__nccwpck_require__(8299));
@@ -236,7 +236,7 @@ const cacheHttpClient = __importStar(__nccwpck_require__(3171));
 const cacheTwirpClient = __importStar(__nccwpck_require__(6819));
 const config_1 = __nccwpck_require__(7606);
 const tar_1 = __nccwpck_require__(5321);
-const constants_1 = __nccwpck_require__(8287);
+const http_client_1 = __nccwpck_require__(2026);
 class ValidationError extends Error {
     constructor(message) {
         super(message);
@@ -253,6 +253,14 @@ class ReserveCacheError extends Error {
     }
 }
 exports.ReserveCacheError = ReserveCacheError;
+class FinalizeCacheError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = 'FinalizeCacheError';
+        Object.setPrototypeOf(this, FinalizeCacheError.prototype);
+    }
+}
+exports.FinalizeCacheError = FinalizeCacheError;
 function checkPaths(paths) {
     if (!paths || paths.length === 0) {
         throw new ValidationError(`Path Validation Error: At least one directory or file path is required`);
@@ -273,7 +281,17 @@ function checkKey(key) {
  * @returns boolean return true if Actions cache service feature is available, otherwise false
  */
 function isFeatureAvailable() {
-    return !!process.env['ACTIONS_CACHE_URL'];
+    const cacheServiceVersion = (0, config_1.getCacheServiceVersion)();
+    // Check availability based on cache service version
+    switch (cacheServiceVersion) {
+        case 'v2':
+            // For v2, we need ACTIONS_RESULTS_URL
+            return !!process.env['ACTIONS_RESULTS_URL'];
+        case 'v1':
+        default:
+            // For v1, we only need ACTIONS_CACHE_URL
+            return !!process.env['ACTIONS_CACHE_URL'];
+    }
 }
 exports.isFeatureAvailable = isFeatureAvailable;
 /**
@@ -358,8 +376,16 @@ function restoreCacheV1(paths, primaryKey, restoreKeys, options, enableCrossOsAr
                 throw error;
             }
             else {
-                // Supress all non-validation cache related errors because caching should be optional
-                core.warning(`Failed to restore: ${error.message}`);
+                // warn on cache restore failure and continue build
+                // Log server errors (5xx) as errors, all other errors as warnings
+                if (typedError instanceof http_client_1.HttpClientError &&
+                    typeof typedError.statusCode === 'number' &&
+                    typedError.statusCode >= 500) {
+                    core.error(`Failed to restore: ${error.message}`);
+                }
+                else {
+                    core.warning(`Failed to restore: ${error.message}`);
+                }
             }
         }
         finally {
@@ -412,7 +438,13 @@ function restoreCacheV2(paths, primaryKey, restoreKeys, options, enableCrossOsAr
                 core.debug(`Cache not found for version ${request.version} of keys: ${keys.join(', ')}`);
                 return undefined;
             }
-            core.info(`Cache hit for: ${request.key}`);
+            const isRestoreKeyMatch = request.key !== response.matchedKey;
+            if (isRestoreKeyMatch) {
+                core.info(`Cache hit for restore-key: ${response.matchedKey}`);
+            }
+            else {
+                core.info(`Cache hit for: ${response.matchedKey}`);
+            }
             if (options === null || options === void 0 ? void 0 : options.lookupOnly) {
                 core.info('Lookup only - skipping download');
                 return response.matchedKey;
@@ -437,7 +469,15 @@ function restoreCacheV2(paths, primaryKey, restoreKeys, options, enableCrossOsAr
             }
             else {
                 // Supress all non-validation cache related errors because caching should be optional
-                core.warning(`Failed to restore: ${error.message}`);
+                // Log server errors (5xx) as errors, all other errors as warnings
+                if (typedError instanceof http_client_1.HttpClientError &&
+                    typeof typedError.statusCode === 'number' &&
+                    typedError.statusCode >= 500) {
+                    core.error(`Failed to restore: ${error.message}`);
+                }
+                else {
+                    core.warning(`Failed to restore: ${error.message}`);
+                }
             }
         }
         finally {
@@ -540,7 +580,15 @@ function saveCacheV1(paths, key, options, enableCrossOsArchive = false) {
                 core.info(`Failed to save: ${typedError.message}`);
             }
             else {
-                core.warning(`Failed to save: ${typedError.message}`);
+                // Log server errors (5xx) as errors, all other errors as warnings
+                if (typedError instanceof http_client_1.HttpClientError &&
+                    typeof typedError.statusCode === 'number' &&
+                    typedError.statusCode >= 500) {
+                    core.error(`Failed to save: ${typedError.message}`);
+                }
+                else {
+                    core.warning(`Failed to save: ${typedError.message}`);
+                }
             }
         }
         finally {
@@ -589,10 +637,6 @@ function saveCacheV2(paths, key, options, enableCrossOsArchive = false) {
             }
             const archiveFileSize = utils.getArchiveFileSizeInBytes(archivePath);
             core.debug(`File Size: ${archiveFileSize}`);
-            // For GHES, this check will take place in ReserveCache API with enterprise file size limit
-            if (archiveFileSize > constants_1.CacheFileSizeLimit && !(0, config_1.isGhes)()) {
-                throw new Error(`Cache size of ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B) is over the 10GB limit, not saving cache.`);
-            }
             // Set the archive size in the options, will be used to display the upload progress
             options.archiveSizeBytes = archiveFileSize;
             core.debug('Reserving Cache');
@@ -605,7 +649,10 @@ function saveCacheV2(paths, key, options, enableCrossOsArchive = false) {
             try {
                 const response = yield twirpClient.CreateCacheEntry(request);
                 if (!response.ok) {
-                    throw new Error('Response was not ok');
+                    if (response.message) {
+                        core.warning(`Cache reservation failed: ${response.message}`);
+                    }
+                    throw new Error(response.message || 'Response was not ok');
                 }
                 signedUploadUrl = response.signedUploadUrl;
             }
@@ -623,6 +670,9 @@ function saveCacheV2(paths, key, options, enableCrossOsArchive = false) {
             const finalizeResponse = yield twirpClient.FinalizeCacheEntryUpload(finalizeRequest);
             core.debug(`FinalizeCacheEntryUploadResponse: ${finalizeResponse.ok}`);
             if (!finalizeResponse.ok) {
+                if (finalizeResponse.message) {
+                    throw new FinalizeCacheError(finalizeResponse.message);
+                }
                 throw new Error(`Unable to finalize cache with key ${key}, another job may be finalizing this cache.`);
             }
             cacheId = parseInt(finalizeResponse.entryId);
@@ -635,8 +685,19 @@ function saveCacheV2(paths, key, options, enableCrossOsArchive = false) {
             else if (typedError.name === ReserveCacheError.name) {
                 core.info(`Failed to save: ${typedError.message}`);
             }
+            else if (typedError.name === FinalizeCacheError.name) {
+                core.warning(typedError.message);
+            }
             else {
-                core.warning(`Failed to save: ${typedError.message}`);
+                // Log server errors (5xx) as errors, all other errors as warnings
+                if (typedError instanceof http_client_1.HttpClientError &&
+                    typeof typedError.statusCode === 'number' &&
+                    typedError.statusCode >= 500) {
+                    core.error(`Failed to save: ${typedError.message}`);
+                }
+                else {
+                    core.warning(`Failed to save: ${typedError.message}`);
+                }
             }
         }
         finally {
@@ -738,11 +799,12 @@ class CreateCacheEntryResponse$Type extends runtime_5.MessageType {
     constructor() {
         super("github.actions.results.api.v1.CreateCacheEntryResponse", [
             { no: 1, name: "ok", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
-            { no: 2, name: "signed_upload_url", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 2, name: "signed_upload_url", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value) {
-        const message = { ok: false, signedUploadUrl: "" };
+        const message = { ok: false, signedUploadUrl: "", message: "" };
         globalThis.Object.defineProperty(message, runtime_4.MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
             (0, runtime_3.reflectionMergePartial)(this, message, value);
@@ -758,6 +820,9 @@ class CreateCacheEntryResponse$Type extends runtime_5.MessageType {
                     break;
                 case /* string signed_upload_url */ 2:
                     message.signedUploadUrl = reader.string();
+                    break;
+                case /* string message */ 3:
+                    message.message = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -777,6 +842,9 @@ class CreateCacheEntryResponse$Type extends runtime_5.MessageType {
         /* string signed_upload_url = 2; */
         if (message.signedUploadUrl !== "")
             writer.tag(2, runtime_1.WireType.LengthDelimited).string(message.signedUploadUrl);
+        /* string message = 3; */
+        if (message.message !== "")
+            writer.tag(3, runtime_1.WireType.LengthDelimited).string(message.message);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? runtime_2.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -860,11 +928,12 @@ class FinalizeCacheEntryUploadResponse$Type extends runtime_5.MessageType {
     constructor() {
         super("github.actions.results.api.v1.FinalizeCacheEntryUploadResponse", [
             { no: 1, name: "ok", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
-            { no: 2, name: "entry_id", kind: "scalar", T: 3 /*ScalarType.INT64*/ }
+            { no: 2, name: "entry_id", kind: "scalar", T: 3 /*ScalarType.INT64*/ },
+            { no: 3, name: "message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value) {
-        const message = { ok: false, entryId: "0" };
+        const message = { ok: false, entryId: "0", message: "" };
         globalThis.Object.defineProperty(message, runtime_4.MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
             (0, runtime_3.reflectionMergePartial)(this, message, value);
@@ -880,6 +949,9 @@ class FinalizeCacheEntryUploadResponse$Type extends runtime_5.MessageType {
                     break;
                 case /* int64 entry_id */ 2:
                     message.entryId = reader.int64().toString();
+                    break;
+                case /* string message */ 3:
+                    message.message = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -899,6 +971,9 @@ class FinalizeCacheEntryUploadResponse$Type extends runtime_5.MessageType {
         /* int64 entry_id = 2; */
         if (message.entryId !== "0")
             writer.tag(2, runtime_1.WireType.Varint).int64(message.entryId);
+        /* string message = 3; */
+        if (message.message !== "")
+            writer.tag(3, runtime_1.WireType.LengthDelimited).string(message.message);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? runtime_2.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -10373,7 +10448,11 @@ function copyFile(srcFile, destFile, force) {
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -10386,7 +10465,7 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
     __setModuleDefault(result, mod);
     return result;
 };
@@ -10416,11 +10495,11 @@ function _findMatch(versionSpec, stable, candidates, archFilter) {
         let file;
         for (const candidate of candidates) {
             const version = candidate.version;
-            core_1.debug(`check ${version} satisfies ${versionSpec}`);
+            (0, core_1.debug)(`check ${version} satisfies ${versionSpec}`);
             if (semver.satisfies(version, versionSpec) &&
                 (!stable || candidate.stable === stable)) {
                 file = candidate.files.find(item => {
-                    core_1.debug(`${item.arch}===${archFilter} && ${item.platform}===${platFilter}`);
+                    (0, core_1.debug)(`${item.arch}===${archFilter} && ${item.platform}===${platFilter}`);
                     let chk = item.arch === archFilter && item.platform === platFilter;
                     if (chk && item.platform_version) {
                         const osVersion = module.exports._getOsVersion();
@@ -10434,7 +10513,7 @@ function _findMatch(versionSpec, stable, candidates, archFilter) {
                     return chk;
                 });
                 if (file) {
-                    core_1.debug(`matched ${candidate.version}`);
+                    (0, core_1.debug)(`matched ${candidate.version}`);
                     match = candidate;
                     break;
                 }
@@ -10472,10 +10551,7 @@ function _getOsVersion() {
                 if (parts.length === 2 &&
                     (parts[0].trim() === 'VERSION_ID' ||
                         parts[0].trim() === 'DISTRIB_RELEASE')) {
-                    version = parts[1]
-                        .trim()
-                        .replace(/^"/, '')
-                        .replace(/"$/, '');
+                    version = parts[1].trim().replace(/^"/, '').replace(/"$/, '');
                     break;
                 }
             }
@@ -10508,7 +10584,11 @@ exports._readLinuxVersionFile = _readLinuxVersionFile;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -10521,7 +10601,7 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
     __setModuleDefault(result, mod);
     return result;
 };
@@ -10598,7 +10678,11 @@ exports.RetryHelper = RetryHelper;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -10611,7 +10695,7 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
     __setModuleDefault(result, mod);
     return result;
 };
@@ -10624,13 +10708,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.evaluateVersions = exports.isExplicitVersion = exports.findFromManifest = exports.getManifestFromRepo = exports.findAllVersions = exports.find = exports.cacheFile = exports.cacheDir = exports.extractZip = exports.extractXar = exports.extractTar = exports.extract7z = exports.downloadTool = exports.HTTPError = void 0;
 const core = __importStar(__nccwpck_require__(7409));
 const io = __importStar(__nccwpck_require__(7523));
+const crypto = __importStar(__nccwpck_require__(6982));
 const fs = __importStar(__nccwpck_require__(9896));
 const mm = __importStar(__nccwpck_require__(8036));
 const os = __importStar(__nccwpck_require__(857));
@@ -10640,7 +10722,6 @@ const semver = __importStar(__nccwpck_require__(9318));
 const stream = __importStar(__nccwpck_require__(2203));
 const util = __importStar(__nccwpck_require__(9023));
 const assert_1 = __nccwpck_require__(2613);
-const v4_1 = __importDefault(__nccwpck_require__(1350));
 const exec_1 = __nccwpck_require__(5236);
 const retry_helper_1 = __nccwpck_require__(7380);
 class HTTPError extends Error {
@@ -10665,7 +10746,7 @@ const userAgent = 'actions/tool-cache';
  */
 function downloadTool(url, dest, auth, headers) {
     return __awaiter(this, void 0, void 0, function* () {
-        dest = dest || path.join(_getTempDirectory(), v4_1.default());
+        dest = dest || path.join(_getTempDirectory(), crypto.randomUUID());
         yield io.mkdirP(path.dirname(dest));
         core.debug(`Downloading ${url}`);
         core.debug(`Destination ${dest}`);
@@ -10754,8 +10835,8 @@ function downloadToolAttempt(url, dest, auth, headers) {
  */
 function extract7z(file, dest, _7zPath) {
     return __awaiter(this, void 0, void 0, function* () {
-        assert_1.ok(IS_WINDOWS, 'extract7z() not supported on current OS');
-        assert_1.ok(file, 'parameter "file" is required');
+        (0, assert_1.ok)(IS_WINDOWS, 'extract7z() not supported on current OS');
+        (0, assert_1.ok)(file, 'parameter "file" is required');
         dest = yield _createExtractFolder(dest);
         const originalCwd = process.cwd();
         process.chdir(dest);
@@ -10772,7 +10853,7 @@ function extract7z(file, dest, _7zPath) {
                 const options = {
                     silent: true
                 };
-                yield exec_1.exec(`"${_7zPath}"`, args, options);
+                yield (0, exec_1.exec)(`"${_7zPath}"`, args, options);
             }
             finally {
                 process.chdir(originalCwd);
@@ -10801,7 +10882,7 @@ function extract7z(file, dest, _7zPath) {
             };
             try {
                 const powershellPath = yield io.which('powershell', true);
-                yield exec_1.exec(`"${powershellPath}"`, args, options);
+                yield (0, exec_1.exec)(`"${powershellPath}"`, args, options);
             }
             finally {
                 process.chdir(originalCwd);
@@ -10829,7 +10910,7 @@ function extractTar(file, dest, flags = 'xz') {
         // Determine whether GNU tar
         core.debug('Checking tar --version');
         let versionOutput = '';
-        yield exec_1.exec('tar --version', [], {
+        yield (0, exec_1.exec)('tar --version', [], {
             ignoreReturnCode: true,
             silent: true,
             listeners: {
@@ -10865,7 +10946,7 @@ function extractTar(file, dest, flags = 'xz') {
             args.push('--overwrite');
         }
         args.push('-C', destArg, '-f', fileArg);
-        yield exec_1.exec(`tar`, args);
+        yield (0, exec_1.exec)(`tar`, args);
         return dest;
     });
 }
@@ -10880,8 +10961,8 @@ exports.extractTar = extractTar;
  */
 function extractXar(file, dest, flags = []) {
     return __awaiter(this, void 0, void 0, function* () {
-        assert_1.ok(IS_MAC, 'extractXar() not supported on current OS');
-        assert_1.ok(file, 'parameter "file" is required');
+        (0, assert_1.ok)(IS_MAC, 'extractXar() not supported on current OS');
+        (0, assert_1.ok)(file, 'parameter "file" is required');
         dest = yield _createExtractFolder(dest);
         let args;
         if (flags instanceof Array) {
@@ -10895,7 +10976,7 @@ function extractXar(file, dest, flags = []) {
             args.push('-v');
         }
         const xarPath = yield io.which('xar', true);
-        yield exec_1.exec(`"${xarPath}"`, _unique(args));
+        yield (0, exec_1.exec)(`"${xarPath}"`, _unique(args));
         return dest;
     });
 }
@@ -10949,7 +11030,7 @@ function extractZipWin(file, dest) {
                 pwshCommand
             ];
             core.debug(`Using pwsh at path: ${pwshPath}`);
-            yield exec_1.exec(`"${pwshPath}"`, args);
+            yield (0, exec_1.exec)(`"${pwshPath}"`, args);
         }
         else {
             const powershellCommand = [
@@ -10970,7 +11051,7 @@ function extractZipWin(file, dest) {
             ];
             const powershellPath = yield io.which('powershell', true);
             core.debug(`Using powershell at path: ${powershellPath}`);
-            yield exec_1.exec(`"${powershellPath}"`, args);
+            yield (0, exec_1.exec)(`"${powershellPath}"`, args);
         }
     });
 }
@@ -10982,7 +11063,7 @@ function extractZipNix(file, dest) {
             args.unshift('-q');
         }
         args.unshift('-o'); //overwrite with -o, otherwise a prompt is shown which freezes the run
-        yield exec_1.exec(`"${unzipPath}"`, args, { cwd: dest });
+        yield (0, exec_1.exec)(`"${unzipPath}"`, args, { cwd: dest });
     });
 }
 /**
@@ -11159,7 +11240,7 @@ function _createExtractFolder(dest) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!dest) {
             // create a temp dir
-            dest = path.join(_getTempDirectory(), v4_1.default());
+            dest = path.join(_getTempDirectory(), crypto.randomUUID());
         }
         yield io.mkdirP(dest);
         return dest;
@@ -11232,7 +11313,7 @@ exports.evaluateVersions = evaluateVersions;
  */
 function _getCacheDirectory() {
     const cacheDirectory = process.env['RUNNER_TOOL_CACHE'] || '';
-    assert_1.ok(cacheDirectory, 'Expected RUNNER_TOOL_CACHE to be defined');
+    (0, assert_1.ok)(cacheDirectory, 'Expected RUNNER_TOOL_CACHE to be defined');
     return cacheDirectory;
 }
 /**
@@ -11240,7 +11321,7 @@ function _getCacheDirectory() {
  */
 function _getTempDirectory() {
     const tempDirectory = process.env['RUNNER_TEMP'] || '';
-    assert_1.ok(tempDirectory, 'Expected RUNNER_TEMP to be defined');
+    (0, assert_1.ok)(tempDirectory, 'Expected RUNNER_TEMP to be defined');
     return tempDirectory;
 }
 /**
@@ -13431,90 +13512,6 @@ function copyFile(srcFile, destFile, force) {
     });
 }
 //# sourceMappingURL=io.js.map
-
-/***/ }),
-
-/***/ 2727:
-/***/ ((module) => {
-
-/**
- * Convert array of 16 byte values to UUID string format of the form:
- * XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
- */
-var byteToHex = [];
-for (var i = 0; i < 256; ++i) {
-  byteToHex[i] = (i + 0x100).toString(16).substr(1);
-}
-
-function bytesToUuid(buf, offset) {
-  var i = offset || 0;
-  var bth = byteToHex;
-  // join used to fix memory issue caused by concatenation: https://bugs.chromium.org/p/v8/issues/detail?id=3175#c4
-  return ([
-    bth[buf[i++]], bth[buf[i++]],
-    bth[buf[i++]], bth[buf[i++]], '-',
-    bth[buf[i++]], bth[buf[i++]], '-',
-    bth[buf[i++]], bth[buf[i++]], '-',
-    bth[buf[i++]], bth[buf[i++]], '-',
-    bth[buf[i++]], bth[buf[i++]],
-    bth[buf[i++]], bth[buf[i++]],
-    bth[buf[i++]], bth[buf[i++]]
-  ]).join('');
-}
-
-module.exports = bytesToUuid;
-
-
-/***/ }),
-
-/***/ 9879:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-// Unique ID creation requires a high quality random # generator.  In node.js
-// this is pretty straight-forward - we use the crypto API.
-
-var crypto = __nccwpck_require__(6982);
-
-module.exports = function nodeRNG() {
-  return crypto.randomBytes(16);
-};
-
-
-/***/ }),
-
-/***/ 1350:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-var rng = __nccwpck_require__(9879);
-var bytesToUuid = __nccwpck_require__(2727);
-
-function v4(options, buf, offset) {
-  var i = buf && offset || 0;
-
-  if (typeof(options) == 'string') {
-    buf = options === 'binary' ? new Array(16) : null;
-    options = null;
-  }
-  options = options || {};
-
-  var rnds = options.random || (options.rng || rng)();
-
-  // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
-  rnds[6] = (rnds[6] & 0x0f) | 0x40;
-  rnds[8] = (rnds[8] & 0x3f) | 0x80;
-
-  // Copy bytes to buffer, if provided
-  if (buf) {
-    for (var ii = 0; ii < 16; ++ii) {
-      buf[i + ii] = rnds[ii];
-    }
-  }
-
-  return buf || bytesToUuid(rnds);
-}
-
-module.exports = v4;
-
 
 /***/ }),
 
@@ -50477,6 +50474,10 @@ class RpcOutputStreamController {
             cmp: [],
         };
         this._closed = false;
+        // --- RpcOutputStream async iterator API
+        // iterator state.
+        // is undefined when no iterator has been acquired yet.
+        this._itState = { q: [] };
     }
     // --- RpcOutputStream callback API
     onNext(callback) {
@@ -50576,10 +50577,6 @@ class RpcOutputStreamController {
      *   messages are queued.
      */
     [Symbol.asyncIterator]() {
-        // init the iterator state, enabling pushIt()
-        if (!this._itState) {
-            this._itState = { q: [] };
-        }
         // if we are closed, we are definitely not receiving any more messages.
         // but we can't let the iterator get stuck. we want to either:
         // a) finish the new iterator immediately, because we are completed
@@ -50612,8 +50609,6 @@ class RpcOutputStreamController {
     // this either resolves a pending promise, or enqueues the result.
     pushIt(result) {
         let state = this._itState;
-        if (!state)
-            return;
         // is the consumer waiting for us?
         if (state.p) {
             // yes, consumer is waiting for this promise.
@@ -52525,6 +52520,7 @@ const reflection_equals_1 = __nccwpck_require__(4827);
 const binary_writer_1 = __nccwpck_require__(3957);
 const binary_reader_1 = __nccwpck_require__(2889);
 const baseDescriptors = Object.getOwnPropertyDescriptors(Object.getPrototypeOf({}));
+const messageTypeDescriptor = baseDescriptors[message_type_contract_1.MESSAGE_TYPE] = {};
 /**
  * This standard message type provides reflection-based
  * operations to work with a message.
@@ -52535,7 +52531,8 @@ class MessageType {
         this.typeName = name;
         this.fields = fields.map(reflection_info_1.normalizeFieldInfo);
         this.options = options !== null && options !== void 0 ? options : {};
-        this.messagePrototype = Object.create(null, Object.assign(Object.assign({}, baseDescriptors), { [message_type_contract_1.MESSAGE_TYPE]: { value: this } }));
+        messageTypeDescriptor.value = this;
+        this.messagePrototype = Object.create(null, baseDescriptors);
         this.refTypeCheck = new reflection_type_check_1.ReflectionTypeCheck(this);
         this.refJsonReader = new reflection_json_reader_1.ReflectionJsonReader(this);
         this.refJsonWriter = new reflection_json_writer_1.ReflectionJsonWriter(this);
@@ -95019,7 +95016,7 @@ module.exports = parseParams
 /***/ ((module) => {
 
 "use strict";
-module.exports = /*#__PURE__*/JSON.parse('{"name":"@actions/cache","version":"4.0.3","preview":true,"description":"Actions cache lib","keywords":["github","actions","cache"],"homepage":"https://github.com/actions/toolkit/tree/main/packages/cache","license":"MIT","main":"lib/cache.js","types":"lib/cache.d.ts","directories":{"lib":"lib","test":"__tests__"},"files":["lib","!.DS_Store"],"publishConfig":{"access":"public"},"repository":{"type":"git","url":"git+https://github.com/actions/toolkit.git","directory":"packages/cache"},"scripts":{"audit-moderate":"npm install && npm audit --json --audit-level=moderate > audit.json","test":"echo \\"Error: run tests from root\\" && exit 1","tsc":"tsc"},"bugs":{"url":"https://github.com/actions/toolkit/issues"},"dependencies":{"@actions/core":"^1.11.1","@actions/exec":"^1.0.1","@actions/glob":"^0.1.0","@actions/http-client":"^2.1.1","@actions/io":"^1.0.1","@azure/abort-controller":"^1.1.0","@azure/ms-rest-js":"^2.6.0","@azure/storage-blob":"^12.13.0","@protobuf-ts/plugin":"^2.9.4","semver":"^6.3.1"},"devDependencies":{"@types/node":"^22.13.9","@types/semver":"^6.0.0","typescript":"^5.2.2"}}');
+module.exports = /*#__PURE__*/JSON.parse('{"name":"@actions/cache","version":"4.1.0","preview":true,"description":"Actions cache lib","keywords":["github","actions","cache"],"homepage":"https://github.com/actions/toolkit/tree/main/packages/cache","license":"MIT","main":"lib/cache.js","types":"lib/cache.d.ts","directories":{"lib":"lib","test":"__tests__"},"files":["lib","!.DS_Store"],"publishConfig":{"access":"public"},"repository":{"type":"git","url":"git+https://github.com/actions/toolkit.git","directory":"packages/cache"},"scripts":{"audit-moderate":"npm install && npm audit --json --audit-level=moderate > audit.json","test":"echo \\"Error: run tests from root\\" && exit 1","tsc":"tsc"},"bugs":{"url":"https://github.com/actions/toolkit/issues"},"dependencies":{"@actions/core":"^1.11.1","@actions/exec":"^1.0.1","@actions/glob":"^0.1.0","@protobuf-ts/runtime-rpc":"^2.11.1","@actions/http-client":"^2.1.1","@actions/io":"^1.0.1","@azure/abort-controller":"^1.1.0","@azure/ms-rest-js":"^2.6.0","@azure/storage-blob":"^12.13.0","semver":"^6.3.1"},"devDependencies":{"@types/node":"^22.13.9","@types/semver":"^6.0.0","@protobuf-ts/plugin":"^2.9.4","typescript":"^5.2.2"}}');
 
 /***/ }),
 
