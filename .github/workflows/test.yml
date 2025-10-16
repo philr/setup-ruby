@@ -15,16 +15,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # macos-14 (arm64) is currently not supported. x64 builds should work,
-        # but aren't freely available.
-        os: [ ubuntu-22.04, ubuntu-24.04, macos-13, windows-2022, windows-2025 ]
+        # macos-14 and later (arm64) is currently not supported (because Ruby
+        # fails to build).
+        os: [ ubuntu-22.04, ubuntu-24.04, macos-15-intel, windows-2022, windows-2025 ]
         ruby: [ '1.8.7', '1.9.3', '2.0', jruby-1.7, jruby-9.0, jruby-9.1, jruby-9.2 ]
         architecture: [ default ]
         exclude:
           - os: ubuntu-22.04
             ruby: '1.8.7'
             architecture: default
-          - os: macos-13
+          - os: macos-15-intel
             ruby: '1.8.7'
             architecture: default
           - os: windows-2022
