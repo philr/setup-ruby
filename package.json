@@ -5,7 +5,7 @@
   "description": "Download a prebuilt Ruby and add it to the PATH in 5 seconds",
   "main": "index.js",
   "scripts": {
-    "package": "ncc build index.js -o dist"
+    "package": "rm -rf dist && ncc build index.js -o dist"
   },
   "repository": {
     "type": "git",
