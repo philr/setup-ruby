@@ -47,7 +47,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - uses: ruby/setup-ruby@v1
       with:
         ruby-version: '1.9.3' # Not needed with a .ruby-version file
@@ -81,7 +81,7 @@ jobs:
             architecture: default
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - uses: philr/setup-ruby@legacy-v1
       with:
         ruby-version: ${{ matrix.ruby }}
@@ -104,7 +104,7 @@ jobs:
     env: # $BUNDLE_GEMFILE must be set at the job level, so it is set for all steps
       BUNDLE_GEMFILE: gemfiles/${{ matrix.gemfile }}.gemfile
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./
         with:
           ruby-version: 2.0.0
