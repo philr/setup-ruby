@@ -2,7 +2,7 @@ export const id = 347;
 export const ids = [347];
 export const modules = {
 
-/***/ 99347:
+/***/ 9347:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 // ESM COMPAT FLAG
@@ -15,19 +15,19 @@ __webpack_require__.d(__webpack_exports__, {
 });
 
 // EXTERNAL MODULE: external "node:os"
-var external_node_os_ = __webpack_require__(48161);
+var external_node_os_ = __webpack_require__(8161);
 // EXTERNAL MODULE: external "node:fs"
-var external_node_fs_ = __webpack_require__(73024);
+var external_node_fs_ = __webpack_require__(3024);
 // EXTERNAL MODULE: external "node:path"
-var external_node_path_ = __webpack_require__(76760);
-// EXTERNAL MODULE: ./node_modules/@actions/exec/lib/exec.js
-var exec = __webpack_require__(95236);
+var external_node_path_ = __webpack_require__(6760);
+// EXTERNAL MODULE: ./node_modules/@actions/exec/lib/exec.js + 2 modules
+var exec = __webpack_require__(5260);
 // EXTERNAL MODULE: ./node_modules/@actions/io/lib/io.js
-var io = __webpack_require__(94994);
-// EXTERNAL MODULE: ./node_modules/@actions/tool-cache/lib/tool-cache.js
-var tool_cache = __webpack_require__(33472);
-// EXTERNAL MODULE: ./common.js + 1 modules
-var common = __webpack_require__(92409);
+var io = __webpack_require__(8701);
+// EXTERNAL MODULE: ./node_modules/@actions/tool-cache/lib/tool-cache.js + 2 modules
+var tool_cache = __webpack_require__(9805);
+// EXTERNAL MODULE: ./common.js
+var common = __webpack_require__(9042);
 ;// CONCATENATED MODULE: ./ruby-builder-versions.js
 function getVersions(platform) {
   const versions = {
@@ -72,7 +72,7 @@ async function install(platform, engine, architecture, version) {
 
   let rubyPrefix, inToolCache
   if (common/* shouldUseToolCache */.NR(engine, version)) {
-    inToolCache = tool_cache.find('Ruby', version)
+    inToolCache = tool_cache/* find */.I6('Ruby', version)
     if (inToolCache) {
       rubyPrefix = inToolCache
     } else {
@@ -97,23 +97,23 @@ async function install(platform, engine, architecture, version) {
 async function downloadAndExtract(platform, engine, version, rubyPrefix) {
   const parentDir = external_node_path_.dirname(rubyPrefix)
 
-  await io.rmRF(rubyPrefix)
+  await io/* rmRF */.Yz(rubyPrefix)
   if (!(external_node_fs_.existsSync(parentDir) && external_node_fs_.statSync(parentDir).isDirectory())) {
-    await io.mkdirP(parentDir)
+    await io/* mkdirP */.U$(parentDir)
   }
 
   const downloadPath = await common/* measure */.xP('Downloading Ruby', async () => {
     const url = getDownloadURL(platform, engine, version)
     console.log(url)
-    return await tool_cache.downloadTool(url)
+    return await tool_cache/* downloadTool */.bq(url)
   })
 
   await common/* measure */.xP('Extracting Ruby', async () => {
     if (windows) {
       // Windows 2016 doesn't have system tar, use MSYS2's, it needs unix style paths
-      await exec.exec('tar', ['-xz', '-C', common/* win2nix */.O6(parentDir), '-f', common/* win2nix */.O6(downloadPath)])
+      await exec/* exec */.m('tar', ['-xz', '-C', common/* win2nix */.O6(parentDir), '-f', common/* win2nix */.O6(downloadPath)])
     } else {
-      await exec.exec('tar', ['-xz', '-C', parentDir, '-f', downloadPath])
+      await exec/* exec */.m('tar', ['-xz', '-C', parentDir, '-f', downloadPath])
     }
   })
 

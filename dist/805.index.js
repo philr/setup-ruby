@@ -1,35 +1,35 @@
-export const id = 472;
-export const ids = [472];
+export const id = 805;
+export const ids = [805];
 export const modules = {
 
-/***/ 58036:
-/***/ (function(module, exports, __webpack_require__) {
+/***/ 9805:
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
+// EXPORTS
+__webpack_require__.d(__webpack_exports__, {
+  bq: () => (/* binding */ downloadTool),
+  I6: () => (/* binding */ find)
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+
+// UNUSED EXPORTS: HTTPError, cacheDir, cacheFile, evaluateVersions, extract7z, extractTar, extractXar, extractZip, findAllVersions, findFromManifest, getManifestFromRepo, isExplicitVersion
+
+// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js + 7 modules
+var lib_core = __webpack_require__(3838);
+// EXTERNAL MODULE: ./node_modules/@actions/io/lib/io.js
+var lib_io = __webpack_require__(8701);
+// EXTERNAL MODULE: external "crypto"
+var external_crypto_ = __webpack_require__(6982);
+// EXTERNAL MODULE: external "fs"
+var external_fs_ = __webpack_require__(9896);
+// EXTERNAL MODULE: ./node_modules/semver/index.js
+var node_modules_semver = __webpack_require__(2088);
+// EXTERNAL MODULE: external "os"
+var external_os_ = __webpack_require__(857);
+// EXTERNAL MODULE: external "child_process"
+var external_child_process_ = __webpack_require__(5317);
+;// CONCATENATED MODULE: ./node_modules/@actions/tool-cache/lib/manifest.js
+var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -38,15 +38,26 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports._readLinuxVersionFile = exports._getOsVersion = exports._findMatch = void 0;
-const semver = __importStar(__webpack_require__(39318));
-const core_1 = __webpack_require__(37484);
-// needs to be require for core node modules to be mocked
-/* eslint @typescript-eslint/no-require-imports: 0 */
-const os = __webpack_require__(70857);
-const cp = __webpack_require__(35317);
-const fs = __webpack_require__(79896);
+
+
+
+
+
+// Internal object for testability (allows mocking in ESM)
+const _internal = {
+    readLinuxVersionFile() {
+        const lsbReleaseFile = '/etc/lsb-release';
+        const osReleaseFile = '/etc/os-release';
+        let contents = '';
+        if (external_fs_.existsSync(lsbReleaseFile)) {
+            contents = external_fs_.readFileSync(lsbReleaseFile).toString();
+        }
+        else if (external_fs_.existsSync(osReleaseFile)) {
+            contents = external_fs_.readFileSync(osReleaseFile).toString();
+        }
+        return contents;
+    }
+};
 function _findMatch(versionSpec, stable, candidates, archFilter) {
     return __awaiter(this, void 0, void 0, function* () {
         const platFilter = os.platform();
@@ -55,14 +66,14 @@ function _findMatch(versionSpec, stable, candidates, archFilter) {
         let file;
         for (const candidate of candidates) {
             const version = candidate.version;
-            (0, core_1.debug)(`check ${version} satisfies ${versionSpec}`);
+            debug(`check ${version} satisfies ${versionSpec}`);
             if (semver.satisfies(version, versionSpec) &&
                 (!stable || candidate.stable === stable)) {
                 file = candidate.files.find(item => {
-                    (0, core_1.debug)(`${item.arch}===${archFilter} && ${item.platform}===${platFilter}`);
+                    debug(`${item.arch}===${archFilter} && ${item.platform}===${platFilter}`);
                     let chk = item.arch === archFilter && item.platform === platFilter;
                     if (chk && item.platform_version) {
-                        const osVersion = module.exports._getOsVersion();
+                        const osVersion = _getOsVersion();
                         if (osVersion === item.platform_version) {
                             chk = true;
                         }
@@ -73,7 +84,7 @@ function _findMatch(versionSpec, stable, candidates, archFilter) {
                     return chk;
                 });
                 if (file) {
-                    (0, core_1.debug)(`matched ${candidate.version}`);
+                    debug(`matched ${candidate.version}`);
                     match = candidate;
                     break;
                 }
@@ -87,7 +98,6 @@ function _findMatch(versionSpec, stable, candidates, archFilter) {
         return result;
     });
 }
-exports._findMatch = _findMatch;
 function _getOsVersion() {
     // TODO: add windows and other linux, arm variants
     // right now filtering on version is only an ubuntu and macos scenario for tools we build for hosted (python)
@@ -103,7 +113,7 @@ function _getOsVersion() {
         // DISTRIB_RELEASE=18.04
         // DISTRIB_CODENAME=bionic
         // DISTRIB_DESCRIPTION="Ubuntu 18.04.4 LTS"
-        const lsbContents = module.exports._readLinuxVersionFile();
+        const lsbContents = _internal.readLinuxVersionFile();
         if (lsbContents) {
             const lines = lsbContents.split('\n');
             for (const line of lines) {
@@ -119,52 +129,25 @@ function _getOsVersion() {
     }
     return version;
 }
-exports._getOsVersion = _getOsVersion;
+// Alias for backwards compatibility
 function _readLinuxVersionFile() {
-    const lsbReleaseFile = '/etc/lsb-release';
-    const osReleaseFile = '/etc/os-release';
-    let contents = '';
-    if (fs.existsSync(lsbReleaseFile)) {
-        contents = fs.readFileSync(lsbReleaseFile).toString();
-    }
-    else if (fs.existsSync(osReleaseFile)) {
-        contents = fs.readFileSync(osReleaseFile).toString();
-    }
-    return contents;
+    return _internal.readLinuxVersionFile();
 }
-exports._readLinuxVersionFile = _readLinuxVersionFile;
 //# sourceMappingURL=manifest.js.map
-
-/***/ }),
-
-/***/ 67380:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+// EXTERNAL MODULE: external "path"
+var external_path_ = __webpack_require__(6928);
+// EXTERNAL MODULE: ./node_modules/@actions/http-client/lib/index.js + 1 modules
+var lib = __webpack_require__(4942);
+// EXTERNAL MODULE: external "stream"
+var external_stream_ = __webpack_require__(2203);
+// EXTERNAL MODULE: external "util"
+var external_util_ = __webpack_require__(9023);
+// EXTERNAL MODULE: external "assert"
+var external_assert_ = __webpack_require__(2613);
+// EXTERNAL MODULE: ./node_modules/@actions/exec/lib/exec.js + 2 modules
+var lib_exec = __webpack_require__(5260);
+;// CONCATENATED MODULE: ./node_modules/@actions/tool-cache/lib/retry-helper.js
+var retry_helper_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -173,9 +156,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.RetryHelper = void 0;
-const core = __importStar(__webpack_require__(37484));
+
 /**
  * Internal class for retries
  */
@@ -192,7 +173,7 @@ class RetryHelper {
         }
     }
     execute(action, isRetryable) {
-        return __awaiter(this, void 0, void 0, function* () {
+        return retry_helper_awaiter(this, void 0, void 0, function* () {
             let attempt = 1;
             while (attempt < this.maxAttempts) {
                 // Try
@@ -203,11 +184,11 @@ class RetryHelper {
                     if (isRetryable && !isRetryable(err)) {
                         throw err;
                     }
-                    core.info(err.message);
+                    lib_core/* info */.pq(err.message);
                 }
                 // Sleep
                 const seconds = this.getSleepAmount();
-                core.info(`Waiting ${seconds} seconds before trying again`);
+                lib_core/* info */.pq(`Waiting ${seconds} seconds before trying again`);
                 yield this.sleep(seconds);
                 attempt++;
             }
@@ -220,44 +201,14 @@ class RetryHelper {
             this.minSeconds);
     }
     sleep(seconds) {
-        return __awaiter(this, void 0, void 0, function* () {
+        return retry_helper_awaiter(this, void 0, void 0, function* () {
             return new Promise(resolve => setTimeout(resolve, seconds * 1000));
         });
     }
 }
-exports.RetryHelper = RetryHelper;
 //# sourceMappingURL=retry-helper.js.map
-
-/***/ }),
-
-/***/ 33472:
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+;// CONCATENATED MODULE: ./node_modules/@actions/tool-cache/lib/tool-cache.js
+var tool_cache_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -266,22 +217,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.evaluateVersions = exports.isExplicitVersion = exports.findFromManifest = exports.getManifestFromRepo = exports.findAllVersions = exports.find = exports.cacheFile = exports.cacheDir = exports.extractZip = exports.extractXar = exports.extractTar = exports.extract7z = exports.downloadTool = exports.HTTPError = void 0;
-const core = __importStar(__webpack_require__(37484));
-const io = __importStar(__webpack_require__(94994));
-const crypto = __importStar(__webpack_require__(76982));
-const fs = __importStar(__webpack_require__(79896));
-const mm = __importStar(__webpack_require__(58036));
-const os = __importStar(__webpack_require__(70857));
-const path = __importStar(__webpack_require__(16928));
-const httpm = __importStar(__webpack_require__(54844));
-const semver = __importStar(__webpack_require__(39318));
-const stream = __importStar(__webpack_require__(2203));
-const util = __importStar(__webpack_require__(39023));
-const assert_1 = __webpack_require__(42613);
-const exec_1 = __webpack_require__(95236);
-const retry_helper_1 = __webpack_require__(67380);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class HTTPError extends Error {
     constructor(httpStatusCode) {
         super(`Unexpected HTTP response: ${httpStatusCode}`);
@@ -289,7 +238,6 @@ class HTTPError extends Error {
         Object.setPrototypeOf(this, new.target.prototype);
     }
 }
-exports.HTTPError = HTTPError;
 const IS_WINDOWS = process.platform === 'win32';
 const IS_MAC = process.platform === 'darwin';
 const userAgent = 'actions/tool-cache';
@@ -303,16 +251,16 @@ const userAgent = 'actions/tool-cache';
  * @returns         path to downloaded tool
  */
 function downloadTool(url, dest, auth, headers) {
-    return __awaiter(this, void 0, void 0, function* () {
-        dest = dest || path.join(_getTempDirectory(), crypto.randomUUID());
-        yield io.mkdirP(path.dirname(dest));
-        core.debug(`Downloading ${url}`);
-        core.debug(`Destination ${dest}`);
+    return tool_cache_awaiter(this, void 0, void 0, function* () {
+        dest = dest || external_path_.join(_getTempDirectory(), external_crypto_.randomUUID());
+        yield lib_io/* mkdirP */.U$(external_path_.dirname(dest));
+        lib_core/* debug */.Yz(`Downloading ${url}`);
+        lib_core/* debug */.Yz(`Destination ${dest}`);
         const maxAttempts = 3;
         const minSeconds = _getGlobal('TEST_DOWNLOAD_TOOL_RETRY_MIN_SECONDS', 10);
         const maxSeconds = _getGlobal('TEST_DOWNLOAD_TOOL_RETRY_MAX_SECONDS', 20);
-        const retryHelper = new retry_helper_1.RetryHelper(maxAttempts, minSeconds, maxSeconds);
-        return yield retryHelper.execute(() => __awaiter(this, void 0, void 0, function* () {
+        const retryHelper = new RetryHelper(maxAttempts, minSeconds, maxSeconds);
+        return yield retryHelper.execute(() => tool_cache_awaiter(this, void 0, void 0, function* () {
             return yield downloadToolAttempt(url, dest || '', auth, headers);
         }), (err) => {
             if (err instanceof HTTPError && err.httpStatusCode) {
@@ -328,18 +276,17 @@ function downloadTool(url, dest, auth, headers) {
         });
     });
 }
-exports.downloadTool = downloadTool;
 function downloadToolAttempt(url, dest, auth, headers) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (fs.existsSync(dest)) {
+    return tool_cache_awaiter(this, void 0, void 0, function* () {
+        if (external_fs_.existsSync(dest)) {
             throw new Error(`Destination file path ${dest} already exists`);
         }
         // Get the response headers
-        const http = new httpm.HttpClient(userAgent, [], {
+        const http = new lib/* HttpClient */.Qq(userAgent, [], {
             allowRetries: false
         });
         if (auth) {
-            core.debug('set auth');
+            lib_core/* debug */.Yz('set auth');
             if (headers === undefined) {
                 headers = {};
             }
@@ -348,29 +295,29 @@ function downloadToolAttempt(url, dest, auth, headers) {
         const response = yield http.get(url, headers);
         if (response.message.statusCode !== 200) {
             const err = new HTTPError(response.message.statusCode);
-            core.debug(`Failed to download from "${url}". Code(${response.message.statusCode}) Message(${response.message.statusMessage})`);
+            lib_core/* debug */.Yz(`Failed to download from "${url}". Code(${response.message.statusCode}) Message(${response.message.statusMessage})`);
             throw err;
         }
         // Download the response body
-        const pipeline = util.promisify(stream.pipeline);
+        const pipeline = external_util_.promisify(external_stream_.pipeline);
         const responseMessageFactory = _getGlobal('TEST_DOWNLOAD_TOOL_RESPONSE_MESSAGE_FACTORY', () => response.message);
         const readStream = responseMessageFactory();
         let succeeded = false;
         try {
-            yield pipeline(readStream, fs.createWriteStream(dest));
-            core.debug('download complete');
+            yield pipeline(readStream, external_fs_.createWriteStream(dest));
+            lib_core/* debug */.Yz('download complete');
             succeeded = true;
             return dest;
         }
         finally {
             // Error, delete dest before retry
             if (!succeeded) {
-                core.debug('download failed');
+                lib_core/* debug */.Yz('download failed');
                 try {
-                    yield io.rmRF(dest);
+                    yield lib_io/* rmRF */.Yz(dest);
                 }
                 catch (err) {
-                    core.debug(`Failed to delete '${dest}'. ${err.message}`);
+                    lib_core/* debug */.Yz(`Failed to delete '${dest}'. ${err.message}`);
                 }
             }
         }
@@ -392,9 +339,9 @@ function downloadToolAttempt(url, dest, auth, headers) {
  * @returns        path to the destination directory
  */
 function extract7z(file, dest, _7zPath) {
-    return __awaiter(this, void 0, void 0, function* () {
-        (0, assert_1.ok)(IS_WINDOWS, 'extract7z() not supported on current OS');
-        (0, assert_1.ok)(file, 'parameter "file" is required');
+    return tool_cache_awaiter(this, void 0, void 0, function* () {
+        ok(IS_WINDOWS, 'extract7z() not supported on current OS');
+        ok(file, 'parameter "file" is required');
         dest = yield _createExtractFolder(dest);
         const originalCwd = process.cwd();
         process.chdir(dest);
@@ -402,16 +349,16 @@ function extract7z(file, dest, _7zPath) {
             try {
                 const logLevel = core.isDebug() ? '-bb1' : '-bb0';
                 const args = [
-                    'x',
-                    logLevel,
-                    '-bd',
-                    '-sccUTF-8',
+                    'x', // eXtract files with full paths
+                    logLevel, // -bb[0-3] : set output log level
+                    '-bd', // disable progress indicator
+                    '-sccUTF-8', // set charset for for console input/output
                     file
                 ];
                 const options = {
                     silent: true
                 };
-                yield (0, exec_1.exec)(`"${_7zPath}"`, args, options);
+                yield exec(`"${_7zPath}"`, args, options);
             }
             finally {
                 process.chdir(originalCwd);
@@ -440,7 +387,7 @@ function extract7z(file, dest, _7zPath) {
             };
             try {
                 const powershellPath = yield io.which('powershell', true);
-                yield (0, exec_1.exec)(`"${powershellPath}"`, args, options);
+                yield exec(`"${powershellPath}"`, args, options);
             }
             finally {
                 process.chdir(originalCwd);
@@ -449,7 +396,6 @@ function extract7z(file, dest, _7zPath) {
         return dest;
     });
 }
-exports.extract7z = extract7z;
 /**
  * Extract a compressed tar archive
  *
@@ -458,8 +404,8 @@ exports.extract7z = extract7z;
  * @param flags    flags for the tar command to use for extraction. Defaults to 'xz' (extracting gzipped tars). Optional.
  * @returns        path to the destination directory
  */
-function extractTar(file, dest, flags = 'xz') {
-    return __awaiter(this, void 0, void 0, function* () {
+function extractTar(file_1, dest_1) {
+    return tool_cache_awaiter(this, arguments, void 0, function* (file, dest, flags = 'xz') {
         if (!file) {
             throw new Error("parameter 'file' is required");
         }
@@ -468,7 +414,7 @@ function extractTar(file, dest, flags = 'xz') {
         // Determine whether GNU tar
         core.debug('Checking tar --version');
         let versionOutput = '';
-        yield (0, exec_1.exec)('tar --version', [], {
+        yield exec('tar --version', [], {
             ignoreReturnCode: true,
             silent: true,
             listeners: {
@@ -504,11 +450,10 @@ function extractTar(file, dest, flags = 'xz') {
             args.push('--overwrite');
         }
         args.push('-C', destArg, '-f', fileArg);
-        yield (0, exec_1.exec)(`tar`, args);
+        yield exec(`tar`, args);
         return dest;
     });
 }
-exports.extractTar = extractTar;
 /**
  * Extract a xar compatible archive
  *
@@ -517,10 +462,10 @@ exports.extractTar = extractTar;
  * @param flags    flags for the xar. Optional.
  * @returns        path to the destination directory
  */
-function extractXar(file, dest, flags = []) {
-    return __awaiter(this, void 0, void 0, function* () {
-        (0, assert_1.ok)(IS_MAC, 'extractXar() not supported on current OS');
-        (0, assert_1.ok)(file, 'parameter "file" is required');
+function extractXar(file_1, dest_1) {
+    return tool_cache_awaiter(this, arguments, void 0, function* (file, dest, flags = []) {
+        ok(IS_MAC, 'extractXar() not supported on current OS');
+        ok(file, 'parameter "file" is required');
         dest = yield _createExtractFolder(dest);
         let args;
         if (flags instanceof Array) {
@@ -534,11 +479,10 @@ function extractXar(file, dest, flags = []) {
             args.push('-v');
         }
         const xarPath = yield io.which('xar', true);
-        yield (0, exec_1.exec)(`"${xarPath}"`, _unique(args));
+        yield exec(`"${xarPath}"`, _unique(args));
         return dest;
     });
 }
-exports.extractXar = extractXar;
 /**
  * Extract a zip
  *
@@ -547,7 +491,7 @@ exports.extractXar = extractXar;
  * @returns        path to the destination directory
  */
 function extractZip(file, dest) {
-    return __awaiter(this, void 0, void 0, function* () {
+    return tool_cache_awaiter(this, void 0, void 0, function* () {
         if (!file) {
             throw new Error("parameter 'file' is required");
         }
@@ -561,9 +505,8 @@ function extractZip(file, dest) {
         return dest;
     });
 }
-exports.extractZip = extractZip;
 function extractZipWin(file, dest) {
-    return __awaiter(this, void 0, void 0, function* () {
+    return tool_cache_awaiter(this, void 0, void 0, function* () {
         // build the powershell command
         const escapedFile = file.replace(/'/g, "''").replace(/"|\n|\r/g, ''); // double-up single quotes, remove double quotes and newlines
         const escapedDest = dest.replace(/'/g, "''").replace(/"|\n|\r/g, '');
@@ -588,7 +531,7 @@ function extractZipWin(file, dest) {
                 pwshCommand
             ];
             core.debug(`Using pwsh at path: ${pwshPath}`);
-            yield (0, exec_1.exec)(`"${pwshPath}"`, args);
+            yield exec(`"${pwshPath}"`, args);
         }
         else {
             const powershellCommand = [
@@ -609,19 +552,19 @@ function extractZipWin(file, dest) {
             ];
             const powershellPath = yield io.which('powershell', true);
             core.debug(`Using powershell at path: ${powershellPath}`);
-            yield (0, exec_1.exec)(`"${powershellPath}"`, args);
+            yield exec(`"${powershellPath}"`, args);
         }
     });
 }
 function extractZipNix(file, dest) {
-    return __awaiter(this, void 0, void 0, function* () {
+    return tool_cache_awaiter(this, void 0, void 0, function* () {
         const unzipPath = yield io.which('unzip', true);
         const args = [file];
         if (!core.isDebug()) {
             args.unshift('-q');
         }
         args.unshift('-o'); //overwrite with -o, otherwise a prompt is shown which freezes the run
-        yield (0, exec_1.exec)(`"${unzipPath}"`, args, { cwd: dest });
+        yield exec(`"${unzipPath}"`, args, { cwd: dest });
     });
 }
 /**
@@ -633,7 +576,7 @@ function extractZipNix(file, dest) {
  * @param arch          architecture of the tool.  Optional.  Defaults to machine architecture
  */
 function cacheDir(sourceDir, tool, version, arch) {
-    return __awaiter(this, void 0, void 0, function* () {
+    return tool_cache_awaiter(this, void 0, void 0, function* () {
         version = semver.clean(version) || version;
         arch = arch || os.arch();
         core.debug(`Caching tool ${tool} ${version} ${arch}`);
@@ -654,7 +597,6 @@ function cacheDir(sourceDir, tool, version, arch) {
         return destPath;
     });
 }
-exports.cacheDir = cacheDir;
 /**
  * Caches a downloaded file (GUID) and installs it
  * into the tool cache with a given targetName
@@ -666,7 +608,7 @@ exports.cacheDir = cacheDir;
  * @param arch          architecture of the tool.  Optional.  Defaults to machine architecture
  */
 function cacheFile(sourceFile, targetFile, tool, version, arch) {
-    return __awaiter(this, void 0, void 0, function* () {
+    return tool_cache_awaiter(this, void 0, void 0, function* () {
         version = semver.clean(version) || version;
         arch = arch || os.arch();
         core.debug(`Caching tool ${tool} ${version} ${arch}`);
@@ -686,7 +628,6 @@ function cacheFile(sourceFile, targetFile, tool, version, arch) {
         return destFolder;
     });
 }
-exports.cacheFile = cacheFile;
 /**
  * Finds the path to a tool version in the local installed tool cache
  *
@@ -701,7 +642,7 @@ function find(toolName, versionSpec, arch) {
     if (!versionSpec) {
         throw new Error('versionSpec parameter is required');
     }
-    arch = arch || os.arch();
+    arch = arch || external_os_.arch();
     // attempt to resolve an explicit version
     if (!isExplicitVersion(versionSpec)) {
         const localVersions = findAllVersions(toolName, arch);
@@ -711,20 +652,19 @@ function find(toolName, versionSpec, arch) {
     // check for the explicit version in the cache
     let toolPath = '';
     if (versionSpec) {
-        versionSpec = semver.clean(versionSpec) || '';
-        const cachePath = path.join(_getCacheDirectory(), toolName, versionSpec, arch);
-        core.debug(`checking cache: ${cachePath}`);
-        if (fs.existsSync(cachePath) && fs.existsSync(`${cachePath}.complete`)) {
-            core.debug(`Found tool in cache ${toolName} ${versionSpec} ${arch}`);
+        versionSpec = node_modules_semver.clean(versionSpec) || '';
+        const cachePath = external_path_.join(_getCacheDirectory(), toolName, versionSpec, arch);
+        lib_core/* debug */.Yz(`checking cache: ${cachePath}`);
+        if (external_fs_.existsSync(cachePath) && external_fs_.existsSync(`${cachePath}.complete`)) {
+            lib_core/* debug */.Yz(`Found tool in cache ${toolName} ${versionSpec} ${arch}`);
             toolPath = cachePath;
         }
         else {
-            core.debug('not found');
+            lib_core/* debug */.Yz('not found');
         }
     }
     return toolPath;
 }
-exports.find = find;
 /**
  * Finds the paths to all versions of a tool that are installed in the local tool cache
  *
@@ -733,14 +673,14 @@ exports.find = find;
  */
 function findAllVersions(toolName, arch) {
     const versions = [];
-    arch = arch || os.arch();
-    const toolPath = path.join(_getCacheDirectory(), toolName);
-    if (fs.existsSync(toolPath)) {
-        const children = fs.readdirSync(toolPath);
+    arch = arch || external_os_.arch();
+    const toolPath = external_path_.join(_getCacheDirectory(), toolName);
+    if (external_fs_.existsSync(toolPath)) {
+        const children = external_fs_.readdirSync(toolPath);
         for (const child of children) {
             if (isExplicitVersion(child)) {
-                const fullPath = path.join(toolPath, child, arch || '');
-                if (fs.existsSync(fullPath) && fs.existsSync(`${fullPath}.complete`)) {
+                const fullPath = external_path_.join(toolPath, child, arch || '');
+                if (external_fs_.existsSync(fullPath) && external_fs_.existsSync(`${fullPath}.complete`)) {
                     versions.push(child);
                 }
             }
@@ -748,9 +688,8 @@ function findAllVersions(toolName, arch) {
     }
     return versions;
 }
-exports.findAllVersions = findAllVersions;
-function getManifestFromRepo(owner, repo, auth, branch = 'master') {
-    return __awaiter(this, void 0, void 0, function* () {
+function getManifestFromRepo(owner_1, repo_1, auth_1) {
+    return tool_cache_awaiter(this, arguments, void 0, function* (owner, repo, auth, branch = 'master') {
         let releases = [];
         const treeUrl = `https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}`;
         const http = new httpm.HttpClient('tool-cache');
@@ -785,17 +724,15 @@ function getManifestFromRepo(owner, repo, auth, branch = 'master') {
         return releases;
     });
 }
-exports.getManifestFromRepo = getManifestFromRepo;
-function findFromManifest(versionSpec, stable, manifest, archFilter = os.arch()) {
-    return __awaiter(this, void 0, void 0, function* () {
+function findFromManifest(versionSpec_1, stable_1, manifest_1) {
+    return tool_cache_awaiter(this, arguments, void 0, function* (versionSpec, stable, manifest, archFilter = os.arch()) {
         // wrap the internal impl
         const match = yield mm._findMatch(versionSpec, stable, manifest, archFilter);
         return match;
     });
 }
-exports.findFromManifest = findFromManifest;
 function _createExtractFolder(dest) {
-    return __awaiter(this, void 0, void 0, function* () {
+    return tool_cache_awaiter(this, void 0, void 0, function* () {
         if (!dest) {
             // create a temp dir
             dest = path.join(_getTempDirectory(), crypto.randomUUID());
@@ -805,7 +742,7 @@ function _createExtractFolder(dest) {
     });
 }
 function _createToolPath(tool, version, arch) {
-    return __awaiter(this, void 0, void 0, function* () {
+    return tool_cache_awaiter(this, void 0, void 0, function* () {
         const folderPath = path.join(_getCacheDirectory(), tool, semver.clean(version) || version, arch || '');
         core.debug(`destination ${folderPath}`);
         const markerPath = `${folderPath}.complete`;
@@ -827,13 +764,12 @@ function _completeToolPath(tool, version, arch) {
  * @param versionSpec      version string to check
  */
 function isExplicitVersion(versionSpec) {
-    const c = semver.clean(versionSpec) || '';
-    core.debug(`isExplicit: ${c}`);
-    const valid = semver.valid(c) != null;
-    core.debug(`explicit? ${valid}`);
+    const c = node_modules_semver.clean(versionSpec) || '';
+    lib_core/* debug */.Yz(`isExplicit: ${c}`);
+    const valid = node_modules_semver.valid(c) != null;
+    lib_core/* debug */.Yz(`explicit? ${valid}`);
     return valid;
 }
-exports.isExplicitVersion = isExplicitVersion;
 /**
  * Get the highest satisfiying semantic version in `versions` which satisfies `versionSpec`
  *
@@ -842,36 +778,35 @@ exports.isExplicitVersion = isExplicitVersion;
  */
 function evaluateVersions(versions, versionSpec) {
     let version = '';
-    core.debug(`evaluating ${versions.length} versions`);
+    lib_core/* debug */.Yz(`evaluating ${versions.length} versions`);
     versions = versions.sort((a, b) => {
-        if (semver.gt(a, b)) {
+        if (node_modules_semver.gt(a, b)) {
             return 1;
         }
         return -1;
     });
     for (let i = versions.length - 1; i >= 0; i--) {
         const potential = versions[i];
-        const satisfied = semver.satisfies(potential, versionSpec);
+        const satisfied = node_modules_semver.satisfies(potential, versionSpec);
         if (satisfied) {
             version = potential;
             break;
         }
     }
     if (version) {
-        core.debug(`matched: ${version}`);
+        lib_core/* debug */.Yz(`matched: ${version}`);
     }
     else {
-        core.debug('match not found');
+        lib_core/* debug */.Yz('match not found');
     }
     return version;
 }
-exports.evaluateVersions = evaluateVersions;
 /**
  * Gets RUNNER_TOOL_CACHE
  */
 function _getCacheDirectory() {
     const cacheDirectory = process.env['RUNNER_TOOL_CACHE'] || '';
-    (0, assert_1.ok)(cacheDirectory, 'Expected RUNNER_TOOL_CACHE to be defined');
+    (0,external_assert_.ok)(cacheDirectory, 'Expected RUNNER_TOOL_CACHE to be defined');
     return cacheDirectory;
 }
 /**
@@ -879,7 +814,7 @@ function _getCacheDirectory() {
  */
 function _getTempDirectory() {
     const tempDirectory = process.env['RUNNER_TEMP'] || '';
-    (0, assert_1.ok)(tempDirectory, 'Expected RUNNER_TEMP to be defined');
+    (0,external_assert_.ok)(tempDirectory, 'Expected RUNNER_TEMP to be defined');
     return tempDirectory;
 }
 /**

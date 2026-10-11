@@ -2,7 +2,7 @@ export const id = 491;
 export const ids = [491];
 export const modules = {
 
-/***/ 10491:
+/***/ 491:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 // ESM COMPAT FLAG
@@ -17,21 +17,21 @@ __webpack_require__.d(__webpack_exports__, {
 });
 
 // EXTERNAL MODULE: external "node:fs"
-var external_node_fs_ = __webpack_require__(73024);
+var external_node_fs_ = __webpack_require__(3024);
 // EXTERNAL MODULE: external "node:path"
-var external_node_path_ = __webpack_require__(76760);
+var external_node_path_ = __webpack_require__(6760);
 // EXTERNAL MODULE: external "node:child_process"
-var external_node_child_process_ = __webpack_require__(31421);
-// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
-var core = __webpack_require__(37484);
-// EXTERNAL MODULE: ./node_modules/@actions/exec/lib/exec.js
-var exec = __webpack_require__(95236);
+var external_node_child_process_ = __webpack_require__(1421);
+// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js + 7 modules
+var core = __webpack_require__(3838);
+// EXTERNAL MODULE: ./node_modules/@actions/exec/lib/exec.js + 2 modules
+var exec = __webpack_require__(5260);
 // EXTERNAL MODULE: ./node_modules/@actions/io/lib/io.js
-var io = __webpack_require__(94994);
-// EXTERNAL MODULE: ./node_modules/@actions/tool-cache/lib/tool-cache.js
-var tool_cache = __webpack_require__(33472);
-// EXTERNAL MODULE: ./common.js + 1 modules
-var common = __webpack_require__(92409);
+var io = __webpack_require__(8701);
+// EXTERNAL MODULE: ./node_modules/@actions/tool-cache/lib/tool-cache.js + 2 modules
+var tool_cache = __webpack_require__(9805);
+// EXTERNAL MODULE: ./common.js
+var common = __webpack_require__(9042);
 ;// CONCATENATED MODULE: ./windows-versions.js
 const windows_versions_versions = {
   "x86": {
@@ -124,7 +124,7 @@ async function install(platform, engine, architecture, version) {
 
   let rubyPrefix, inToolCache
   if (common/* shouldUseToolCache */.NR(engine, version)) {
-    inToolCache = architecture === 'x64' && tool_cache.find('Ruby', version)
+    inToolCache = architecture === 'x64' && tool_cache/* find */.I6('Ruby', version)
     if (inToolCache) {
       rubyPrefix = inToolCache
     } else {
@@ -187,11 +187,11 @@ async function installGCCTools(type) {
   const downloadPath = await common/* measure */.xP(`Downloading ${type} build tools`, async () => {
     let url = `${msys2GCCReleaseURI}/msys2-gcc-pkgs/${type}.7z`
     console.log(url)
-    return await tool_cache.downloadTool(url)
+    return await tool_cache/* downloadTool */.bq(url)
   })
 
   await common/* measure */.xP(`Extracting  ${type} build tools`, async () =>
-    exec.exec('7z', ['x', downloadPath, '-aoa', '-bd', `-o${msys2BasePath}`], { silent: true }))
+    exec/* exec */.m('7z', ['x', downloadPath, '-aoa', '-bd', `-o${msys2BasePath}`], { silent: true }))
 }
 
 // Actions windows-2022 image does not contain any MSYS2 build tools.  Install tools for it.
@@ -200,7 +200,7 @@ async function installMSYS2Tools() {
   const downloadPath = await common/* measure */.xP(`Downloading msys2 build tools`, async () => {
     let url = `${msys2GCCReleaseURI}/msys2-gcc-pkgs/msys2.7z`
     console.log(url)
-    return await tool_cache.downloadTool(url)
+    return await tool_cache/* downloadTool */.bq(url)
   })
 
   // need to remove all directories, since they may indicate old packages are installed,
@@ -208,7 +208,7 @@ async function installMSYS2Tools() {
   external_node_fs_.rmSync(`${msys2BasePath}\\var\\lib\\pacman\\local`, { recursive: true, force: true })
 
   await common/* measure */.xP(`Extracting  msys2 build tools`, async () =>
-    exec.exec('7z', ['x', downloadPath, '-aoa', '-bd', `-o${msys2BasePath}`], { silent: true }))
+    exec/* exec */.m('7z', ['x', downloadPath, '-aoa', '-bd', `-o${msys2BasePath}`], { silent: true }))
 }
 
 // Windows JRuby can install gems that require compile tools, only needed for
@@ -223,11 +223,11 @@ async function installVCPkg() {
   const downloadPath = await common/* measure */.xP(`Downloading mswin vcpkg packages`, async () => {
     let url = `${msys2GCCReleaseURI}/msys2-gcc-pkgs/mswin.7z`
     console.log(url)
-    return await tool_cache.downloadTool(url)
+    return await tool_cache/* downloadTool */.bq(url)
   })
 
   await common/* measure */.xP(`Extracting  mswin vcpkg packages`, async () =>
-    exec.exec('7z', ['x', downloadPath, '-aoa', '-bd', `-o${vcPkgBasePath}`], { silent: true }))
+    exec/* exec */.m('7z', ['x', downloadPath, '-aoa', '-bd', `-o${vcPkgBasePath}`], { silent: true }))
 }
 
 async function downloadAndExtract(engine, version, url, base, rubyPrefix) {
@@ -235,11 +235,11 @@ async function downloadAndExtract(engine, version, url, base, rubyPrefix) {
 
   const downloadPath = await common/* measure */.xP('Downloading Ruby', async () => {
     console.log(url)
-    return await tool_cache.downloadTool(url)
+    return await tool_cache/* downloadTool */.bq(url)
   })
 
   await common/* measure */.xP('Extracting Ruby', async () =>
-    exec.exec('7z', ['x', downloadPath, '-bd', `-xr!${base}\\share\\doc`, `-o${parentDir}`], { silent: true }))
+    exec/* exec */.m('7z', ['x', downloadPath, '-bd', `-xr!${base}\\share\\doc`, `-o${parentDir}`], { silent: true }))
 
   if (base !== external_node_path_.basename(rubyPrefix)) {
     await io.mv(external_node_path_.join(parentDir, base), rubyPrefix)
@@ -251,11 +251,11 @@ async function downloadAndExtract(engine, version, url, base, rubyPrefix) {
 }
 
 async function setupMingw(architecture, version) {
-  core.exportVariable('MAKE', 'make.exe')
+  core/* exportVariable */.dN('MAKE', 'make.exe')
 
   if (version.match(/^(1\.|2\.[0123])/)) {
     renameSystem32Dlls()
-    core.exportVariable('SSL_CERT_FILE', certFile)
+    core/* exportVariable */.dN('SSL_CERT_FILE', certFile)
     await common/* measure */.xP('Installing MSYS', async () => installMSYS(architecture, version))
     return architecture === 'x86' ? msysPathEntriesX86 : msysPathEntriesX64
   } else {
@@ -268,20 +268,20 @@ async function installMSYS(architecture, version) {
   const url = architecture === 'x86'
     ? 'https://github.com/oneclick/rubyinstaller/releases/download/devkit-4.7.2/DevKit-mingw64-32-4.7.2-20130224-1151-sfx.exe'
     : 'https://github.com/oneclick/rubyinstaller/releases/download/devkit-4.7.2/DevKit-mingw64-64-4.7.2-20130224-1432-sfx.exe'
-  const downloadPath = await tool_cache.downloadTool(url)
+  const downloadPath = await tool_cache/* downloadTool */.bq(url)
   const msys = architecture === 'x86' ? msysX86 : msysX64
-  await exec.exec('7z', ['x', downloadPath, `-o${msys}`], { silent: true })
+  await exec/* exec */.m('7z', ['x', downloadPath, `-o${msys}`], { silent: true })
 
   // below are set in the old devkit.rb file ?
-  core.exportVariable('RI_DEVKIT', msys)
-  core.exportVariable('CC' , 'gcc')
-  core.exportVariable('CXX', 'g++')
-  core.exportVariable('CPP', 'cpp')
-  core.info(`Installed RubyInstaller DevKit for Ruby ${version}`)
+  core/* exportVariable */.dN('RI_DEVKIT', msys)
+  core/* exportVariable */.dN('CC' , 'gcc')
+  core/* exportVariable */.dN('CXX', 'g++')
+  core/* exportVariable */.dN('CPP', 'cpp')
+  core/* info */.pq(`Installed RubyInstaller DevKit for Ruby ${version}`)
 }
 
 async function setupMSWin() {
-  core.exportVariable('MAKE', 'nmake.exe')
+  core/* exportVariable */.dN('MAKE', 'nmake.exe')
 
   // Pre-installed OpenSSL use C:\Program Files\Common Files\SSL
   const certsDir = 'C:\\Program Files\\Common Files\\SSL\\certs'
@@ -319,7 +319,7 @@ function addVCVARSEnv() {
   if (!external_node_fs_.existsSync(vcVars)) {
     throw new Error(`Missing vcVars file: ${vcVars}`)
   }
-  core.exportVariable('VCVARS', vcVars)
+  core/* exportVariable */.dN('VCVARS', vcVars)
 
   cmd = `cmd.exe /c ""${vcVars}" && set"`
 
@@ -338,7 +338,7 @@ function addVCVARSEnv() {
         const newPathStr = v.replace(`${external_node_path_.delimiter}${process.env['Path']}`, '')
         newPathEntries = newPathStr.split(external_node_path_.delimiter)
       } else {
-        core.exportVariable(k, v)
+        core/* exportVariable */.dN(k, v)
       }
     }
   }
@@ -371,7 +371,7 @@ function addRidkEnv(ridk) {
     if (process.env[k] !== v) {
       if (!/^Path$/i.test(k)) {
         console.log(`${k}=${v}`)
-        core.exportVariable(k, v)
+        core/* exportVariable */.dN(k, v)
       }
     }
   }
