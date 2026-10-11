@@ -1,11 +1,11 @@
-const os = require('os')
-const path = require('path')
-const fs = require('fs')
-const util = require('util')
-const stream = require('stream')
-const crypto = require('crypto')
-const core = require('@actions/core')
-const { performance } = require('perf_hooks')
+import os from 'node:os'
+import path from 'node:path'
+import fs from 'node:fs'
+import util from 'node:util'
+import stream from 'node:stream'
+import crypto from 'node:crypto'
+import * as core from '@actions/core'
+import { performance } from 'node:perf_hooks'
 
 export const windows = (os.platform() === 'win32')
 // Extract to SSD on Windows, see https://github.com/ruby/setup-ruby/pull/14

@@ -1,15 +1,15 @@
 // Most of this logic is from
 // https://github.com/MSP-Greg/actions-ruby/blob/master/lib/main.js
 
-const fs = require('fs')
-const path = require('path')
-const cp = require('child_process')
-const core = require('@actions/core')
-const exec = require('@actions/exec')
-const io = require('@actions/io')
-const tc = require('@actions/tool-cache')
-const common = require('./common')
-const rubyInstallerVersions = require('./windows-versions').versions
+import fs from 'node:fs'
+import path from 'node:path'
+import cp from 'node:child_process'
+import * as core from '@actions/core'
+import * as exec from '@actions/exec'
+import * as io from '@actions/io'
+import * as tc from '@actions/tool-cache'
+import * as common from './common.js'
+import { versions as rubyInstallerVersions } from './windows-versions.js'
 
 const drive = common.drive
 

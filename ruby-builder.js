@@ -1,11 +1,11 @@
-const os = require('os')
-const fs = require('fs')
-const path = require('path')
-const exec = require('@actions/exec')
-const io = require('@actions/io')
-const tc = require('@actions/tool-cache')
-const common = require('./common')
-const rubyBuilderVersions = require('./ruby-builder-versions')
+import os from 'node:os'
+import fs from 'node:fs'
+import path from 'node:path'
+import * as exec from '@actions/exec'
+import * as io from '@actions/io'
+import * as tc from '@actions/tool-cache'
+import * as common from './common.js'
+import * as rubyBuilderVersions from './ruby-builder-versions.js'
 
 const builderReleaseTag = 'toolcache'
 const releasesURL = 'https://github.com/philr/ruby-builder/releases'

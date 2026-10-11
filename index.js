@@ -1,10 +1,10 @@
-const os = require('os')
-const fs = require('fs')
-const path = require('path')
-const core = require('@actions/core')
-const exec = require('@actions/exec')
-const cache = require('@actions/cache')
-const common = require('./common')
+import os from 'node:os'
+import fs from 'node:fs'
+import path from 'node:path'
+import * as core from '@actions/core'
+import * as exec from '@actions/exec'
+import * as cache from '@actions/cache'
+import * as common from './common.js'
 
 const windows = common.windows
 
@@ -46,9 +46,9 @@ export async function setupRuby(options = {}) {
 
   let installer
   if (platform.startsWith('windows-') && engine === 'ruby') {
-    installer = require('./windows')
+    installer = await import('./windows.js')
   } else {
-    installer = require('./ruby-builder')
+    installer = await import('./ruby-builder.js')
   }
 
   const engineVersions = installer.getAvailableVersions(platform, engine, architecture)
@@ -59,8 +59,8 @@ export async function setupRuby(options = {}) {
   // JRuby can use compiled extension code, so make sure gcc exists.
   // As of Jan-2022, JRuby compiles against msvcrt.
   if (platform.startsWith('windows') && (engine === 'jruby') &&
-    !fs.existsSync('C:\\msys64\\mingw64\\bin\\gcc.exe')) {
-    await require('./windows').installJRubyTools()
+      !fs.existsSync('C:\\msys64\\mingw64\\bin\\gcc.exe')) {
+    await (await import('./windows.js')).installJRubyTools()
   }
 
   const rubyPrefix = await installer.install(platform, engine, architecture, version)
@@ -399,4 +399,4 @@ async function computeBaseKey(platform, engine, architecture, version, lockFile)
   return key
 }
 
-if (__filename.endsWith('index.js')) { run() }
+if (import.meta.url.endsWith('index.js')) { run() }
